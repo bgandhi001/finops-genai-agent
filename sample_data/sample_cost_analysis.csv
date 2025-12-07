@@ -1,0 +1,241 @@
+date,service,region,usage_amount,total_cost,resource_count
+2025-11-06,Amazon Elastic Compute Cloud,ap-southeast-1,8845.97,1043.94,28
+2025-11-06,Amazon Relational Database Service,ap-southeast-1,8207.2,961.71,22
+2025-11-06,Amazon Simple Storage Service,ap-southeast-1,4128.96,365.57,57
+2025-11-06,Amazon DynamoDB,ap-southeast-1,8254.54,1782.47,82
+2025-11-06,AWS Lambda,ap-southeast-1,1298.52,1335.55,58
+2025-11-06,Amazon CloudFront,us-west-2,4933.04,98.95,98
+2025-11-06,Amazon ElastiCache,ap-southeast-1,8916.35,733.21,70
+2025-11-06,Amazon Elastic Load Balancing,eu-west-1,2696.71,431.69,21
+2025-11-07,Amazon Elastic Compute Cloud,us-west-2,9663.37,51.16,37
+2025-11-07,Amazon Relational Database Service,eu-west-1,4011.5,1945.59,9
+2025-11-07,Amazon Simple Storage Service,ap-southeast-1,4361.25,229.34,81
+2025-11-07,Amazon DynamoDB,us-west-2,2581.39,1723.12,78
+2025-11-07,AWS Lambda,ap-southeast-1,2866.4,1792.26,46
+2025-11-07,Amazon CloudFront,us-west-2,3700.81,1249.08,95
+2025-11-07,Amazon ElastiCache,ap-southeast-1,4958.47,384.43,17
+2025-11-07,Amazon Elastic Load Balancing,ap-southeast-1,4669.87,172.54,16
+2025-11-08,Amazon Elastic Compute Cloud,us-east-1,439.03,668.06,68
+2025-11-08,Amazon Relational Database Service,us-east-1,1692.07,1532.22,59
+2025-11-08,Amazon Simple Storage Service,ap-southeast-1,624.43,1159.66,36
+2025-11-08,Amazon DynamoDB,ap-southeast-1,566.16,600.01,17
+2025-11-08,AWS Lambda,eu-west-1,3959.36,688.67,47
+2025-11-08,Amazon CloudFront,us-east-1,9050.35,1971.19,96
+2025-11-08,Amazon ElastiCache,eu-west-1,4548.84,1386.62,52
+2025-11-08,Amazon Elastic Load Balancing,us-west-2,8115.49,548.76,32
+2025-11-09,Amazon Elastic Compute Cloud,us-west-2,2717.17,743.75,16
+2025-11-09,Amazon Relational Database Service,us-east-1,2455.72,1942.09,100
+2025-11-09,Amazon Simple Storage Service,eu-west-1,2511.21,1625.16,20
+2025-11-09,Amazon DynamoDB,ap-southeast-1,630.38,545.72,92
+2025-11-09,AWS Lambda,us-east-1,6305.25,1421.64,17
+2025-11-09,Amazon CloudFront,eu-west-1,5541.63,1469.92,6
+2025-11-09,Amazon ElastiCache,us-east-1,3790.21,1119.7,74
+2025-11-09,Amazon Elastic Load Balancing,us-west-2,2193.24,1516.17,13
+2025-11-10,Amazon Elastic Compute Cloud,us-east-1,7224.28,590.14,43
+2025-11-10,Amazon Relational Database Service,us-east-1,1153.89,573.33,47
+2025-11-10,Amazon Simple Storage Service,us-east-1,5650.37,446.6,47
+2025-11-10,Amazon DynamoDB,eu-west-1,1448.22,1438.53,65
+2025-11-10,AWS Lambda,us-east-1,5091.93,1195.77,46
+2025-11-10,Amazon CloudFront,ap-southeast-1,1253.26,1778.72,40
+2025-11-10,Amazon ElastiCache,us-east-1,7344.08,1644.02,46
+2025-11-10,Amazon Elastic Load Balancing,us-east-1,5789.77,1031.15,34
+2025-11-11,Amazon Elastic Compute Cloud,us-west-2,6168.84,1128.1,5
+2025-11-11,Amazon Relational Database Service,ap-southeast-1,4988.94,1109.79,85
+2025-11-11,Amazon Simple Storage Service,eu-west-1,9379.81,260.25,33
+2025-11-11,Amazon DynamoDB,us-west-2,2226.04,132.82,92
+2025-11-11,AWS Lambda,eu-west-1,2185.17,562.85,37
+2025-11-11,Amazon CloudFront,us-east-1,7045.36,626.5,25
+2025-11-11,Amazon ElastiCache,ap-southeast-1,4634.28,464.07,78
+2025-11-11,Amazon Elastic Load Balancing,ap-southeast-1,5893.29,195.63,86
+2025-11-12,Amazon Elastic Compute Cloud,eu-west-1,4562.8,92.65,15
+2025-11-12,Amazon Relational Database Service,us-east-1,7814.25,263.64,78
+2025-11-12,Amazon Simple Storage Service,ap-southeast-1,9884.77,845.42,68
+2025-11-12,Amazon DynamoDB,us-west-2,7419.27,1739.34,26
+2025-11-12,AWS Lambda,eu-west-1,6810.35,586.43,7
+2025-11-12,Amazon CloudFront,eu-west-1,6264.03,1378.47,13
+2025-11-12,Amazon ElastiCache,eu-west-1,9854.51,1099.17,12
+2025-11-12,Amazon Elastic Load Balancing,eu-west-1,8181.09,1776.82,76
+2025-11-13,Amazon Elastic Compute Cloud,us-east-1,5577.52,723.57,100
+2025-11-13,Amazon Relational Database Service,ap-southeast-1,859.76,1636.15,70
+2025-11-13,Amazon Simple Storage Service,us-west-2,7530.98,1833.32,15
+2025-11-13,Amazon DynamoDB,ap-southeast-1,6084.17,1242.27,68
+2025-11-13,AWS Lambda,eu-west-1,7394.64,881.3,80
+2025-11-13,Amazon CloudFront,us-east-1,6404.89,1076.19,71
+2025-11-13,Amazon ElastiCache,ap-southeast-1,7953.53,1942.73,94
+2025-11-13,Amazon Elastic Load Balancing,eu-west-1,4115.44,601.63,74
+2025-11-14,Amazon Elastic Compute Cloud,us-west-2,3855.03,1582.48,69
+2025-11-14,Amazon Relational Database Service,eu-west-1,4486.8,1485.1,6
+2025-11-14,Amazon Simple Storage Service,us-west-2,4750.15,193.85,13
+2025-11-14,Amazon DynamoDB,eu-west-1,1325.43,1566.72,39
+2025-11-14,AWS Lambda,us-east-1,1119.17,463.19,49
+2025-11-14,Amazon CloudFront,us-east-1,5721.04,286.82,96
+2025-11-14,Amazon ElastiCache,us-east-1,7812.02,1147.92,25
+2025-11-14,Amazon Elastic Load Balancing,eu-west-1,5975.91,1076.63,88
+2025-11-15,Amazon Elastic Compute Cloud,eu-west-1,2997.15,921.44,76
+2025-11-15,Amazon Relational Database Service,eu-west-1,5813.61,1114.93,84
+2025-11-15,Amazon Simple Storage Service,eu-west-1,6501.2,625.2,73
+2025-11-15,Amazon DynamoDB,eu-west-1,1368.56,381.15,55
+2025-11-15,AWS Lambda,us-west-2,1175.09,540.61,47
+2025-11-15,Amazon CloudFront,us-east-1,5707.51,1442.2,66
+2025-11-15,Amazon ElastiCache,us-west-2,6915.15,559.15,47
+2025-11-15,Amazon Elastic Load Balancing,eu-west-1,7627.12,1871.94,21
+2025-11-16,Amazon Elastic Compute Cloud,us-west-2,5113.52,1336.25,49
+2025-11-16,Amazon Relational Database Service,ap-southeast-1,222.78,1597.23,83
+2025-11-16,Amazon Simple Storage Service,ap-southeast-1,544.71,1293.21,56
+2025-11-16,Amazon DynamoDB,eu-west-1,2595.01,1782.41,65
+2025-11-16,AWS Lambda,eu-west-1,4748.18,655.38,75
+2025-11-16,Amazon CloudFront,eu-west-1,8615.45,936.73,56
+2025-11-16,Amazon ElastiCache,eu-west-1,3293.8,1499.76,74
+2025-11-16,Amazon Elastic Load Balancing,us-west-2,7050.3,1774.49,93
+2025-11-17,Amazon Elastic Compute Cloud,us-west-2,3079.77,262.11,51
+2025-11-17,Amazon Relational Database Service,us-east-1,5585.58,677.33,92
+2025-11-17,Amazon Simple Storage Service,eu-west-1,6437.84,1272.08,33
+2025-11-17,Amazon DynamoDB,ap-southeast-1,3556.84,773.78,60
+2025-11-17,AWS Lambda,us-west-2,7463.47,849.83,80
+2025-11-17,Amazon CloudFront,eu-west-1,5401.73,164.93,61
+2025-11-17,Amazon ElastiCache,eu-west-1,503.6,1925.22,7
+2025-11-17,Amazon Elastic Load Balancing,eu-west-1,4015.48,78.27,54
+2025-11-18,Amazon Elastic Compute Cloud,us-east-1,6554.87,1604.32,37
+2025-11-18,Amazon Relational Database Service,eu-west-1,6635.23,1216.35,64
+2025-11-18,Amazon Simple Storage Service,eu-west-1,7642.17,1549.64,50
+2025-11-18,Amazon DynamoDB,eu-west-1,515.3,1972.38,90
+2025-11-18,AWS Lambda,ap-southeast-1,8453.27,1156.53,57
+2025-11-18,Amazon CloudFront,us-east-1,7182.29,1491.76,65
+2025-11-18,Amazon ElastiCache,eu-west-1,7783.89,833.96,76
+2025-11-18,Amazon Elastic Load Balancing,eu-west-1,2206.42,1059.67,18
+2025-11-19,Amazon Elastic Compute Cloud,us-east-1,2778.98,155.07,28
+2025-11-19,Amazon Relational Database Service,us-east-1,2603.24,775.26,75
+2025-11-19,Amazon Simple Storage Service,us-east-1,6652.75,1593.56,49
+2025-11-19,Amazon DynamoDB,ap-southeast-1,1807.28,1776.46,40
+2025-11-19,AWS Lambda,us-west-2,5822.5,130.0,88
+2025-11-19,Amazon CloudFront,us-west-2,923.34,1235.57,43
+2025-11-19,Amazon ElastiCache,ap-southeast-1,8883.37,1485.79,89
+2025-11-19,Amazon Elastic Load Balancing,eu-west-1,3399.86,1175.49,82
+2025-11-20,Amazon Elastic Compute Cloud,ap-southeast-1,7283.0,1609.6,18
+2025-11-20,Amazon Relational Database Service,ap-southeast-1,7416.6,1475.52,17
+2025-11-20,Amazon Simple Storage Service,us-east-1,2423.27,1875.08,8
+2025-11-20,Amazon DynamoDB,us-east-1,9259.76,1099.71,7
+2025-11-20,AWS Lambda,ap-southeast-1,2366.45,693.24,59
+2025-11-20,Amazon CloudFront,us-east-1,9125.93,1126.76,42
+2025-11-20,Amazon ElastiCache,ap-southeast-1,6724.04,622.84,36
+2025-11-20,Amazon Elastic Load Balancing,eu-west-1,1012.71,831.08,39
+2025-11-21,Amazon Elastic Compute Cloud,us-east-1,4699.12,1767.53,65
+2025-11-21,Amazon Relational Database Service,us-west-2,179.19,909.48,86
+2025-11-21,Amazon Simple Storage Service,ap-southeast-1,6127.97,616.52,68
+2025-11-21,Amazon DynamoDB,us-east-1,4599.87,313.24,9
+2025-11-21,AWS Lambda,us-east-1,6145.49,1044.69,44
+2025-11-21,Amazon CloudFront,ap-southeast-1,475.88,70.11,78
+2025-11-21,Amazon ElastiCache,eu-west-1,1410.97,1287.57,10
+2025-11-21,Amazon Elastic Load Balancing,us-west-2,2236.89,1027.92,33
+2025-11-22,Amazon Elastic Compute Cloud,eu-west-1,9798.18,736.34,75
+2025-11-22,Amazon Relational Database Service,ap-southeast-1,1522.32,1177.02,80
+2025-11-22,Amazon Simple Storage Service,us-west-2,2945.84,153.53,35
+2025-11-22,Amazon DynamoDB,us-east-1,5463.62,454.87,75
+2025-11-22,AWS Lambda,us-east-1,8943.82,1070.15,13
+2025-11-22,Amazon CloudFront,eu-west-1,6892.03,1431.35,84
+2025-11-22,Amazon ElastiCache,eu-west-1,1542.87,1134.72,21
+2025-11-22,Amazon Elastic Load Balancing,us-west-2,3374.01,175.46,88
+2025-11-23,Amazon Elastic Compute Cloud,us-west-2,8954.8,584.07,13
+2025-11-23,Amazon Relational Database Service,us-east-1,6584.18,845.73,56
+2025-11-23,Amazon Simple Storage Service,ap-southeast-1,5101.44,1031.03,62
+2025-11-23,Amazon DynamoDB,us-east-1,3253.05,920.36,13
+2025-11-23,AWS Lambda,ap-southeast-1,7006.0,474.13,29
+2025-11-23,Amazon CloudFront,ap-southeast-1,6985.57,1904.92,36
+2025-11-23,Amazon ElastiCache,us-east-1,1332.67,283.91,98
+2025-11-23,Amazon Elastic Load Balancing,us-west-2,3502.82,1549.75,13
+2025-11-24,Amazon Elastic Compute Cloud,us-east-1,339.47,1803.82,5
+2025-11-24,Amazon Relational Database Service,us-west-2,7489.05,1168.01,14
+2025-11-24,Amazon Simple Storage Service,eu-west-1,9538.32,654.19,26
+2025-11-24,Amazon DynamoDB,us-east-1,4333.4,1688.26,92
+2025-11-24,AWS Lambda,ap-southeast-1,562.42,540.8,56
+2025-11-24,Amazon CloudFront,us-west-2,1783.08,1449.66,37
+2025-11-24,Amazon ElastiCache,ap-southeast-1,3895.67,90.25,77
+2025-11-24,Amazon Elastic Load Balancing,us-west-2,2668.96,584.23,85
+2025-11-25,Amazon Elastic Compute Cloud,us-west-2,9491.74,1199.16,58
+2025-11-25,Amazon Relational Database Service,ap-southeast-1,9954.75,153.37,27
+2025-11-25,Amazon Simple Storage Service,us-east-1,6502.14,1919.18,43
+2025-11-25,Amazon DynamoDB,ap-southeast-1,3095.27,256.06,74
+2025-11-25,AWS Lambda,us-east-1,8820.78,474.32,63
+2025-11-25,Amazon CloudFront,eu-west-1,3775.3,1512.74,73
+2025-11-25,Amazon ElastiCache,ap-southeast-1,752.71,713.27,51
+2025-11-25,Amazon Elastic Load Balancing,us-west-2,5361.76,1510.36,10
+2025-11-26,Amazon Elastic Compute Cloud,us-east-1,1148.04,836.21,75
+2025-11-26,Amazon Relational Database Service,us-west-2,8436.01,1057.04,96
+2025-11-26,Amazon Simple Storage Service,us-east-1,4491.77,1132.29,60
+2025-11-26,Amazon DynamoDB,us-east-1,541.38,715.47,75
+2025-11-26,AWS Lambda,us-west-2,1194.36,903.53,57
+2025-11-26,Amazon CloudFront,us-west-2,6608.27,1076.89,53
+2025-11-26,Amazon ElastiCache,ap-southeast-1,5518.19,1316.9,18
+2025-11-26,Amazon Elastic Load Balancing,us-east-1,2894.31,1911.34,36
+2025-11-27,Amazon Elastic Compute Cloud,us-west-2,9808.52,1020.23,87
+2025-11-27,Amazon Relational Database Service,us-east-1,6672.11,1529.42,25
+2025-11-27,Amazon Simple Storage Service,ap-southeast-1,6367.03,171.25,99
+2025-11-27,Amazon DynamoDB,eu-west-1,2413.99,787.63,80
+2025-11-27,AWS Lambda,eu-west-1,9743.66,345.63,42
+2025-11-27,Amazon CloudFront,us-east-1,4860.15,1172.69,99
+2025-11-27,Amazon ElastiCache,us-east-1,5110.59,374.42,97
+2025-11-27,Amazon Elastic Load Balancing,us-east-1,1280.56,1006.66,57
+2025-11-28,Amazon Elastic Compute Cloud,us-west-2,3177.08,104.9,62
+2025-11-28,Amazon Relational Database Service,us-east-1,6911.06,1272.0,74
+2025-11-28,Amazon Simple Storage Service,eu-west-1,6313.84,1958.73,53
+2025-11-28,Amazon DynamoDB,us-east-1,1112.43,1476.23,15
+2025-11-28,AWS Lambda,ap-southeast-1,8055.94,105.23,13
+2025-11-28,Amazon CloudFront,us-west-2,2196.16,827.58,24
+2025-11-28,Amazon ElastiCache,us-east-1,2939.8,1472.92,72
+2025-11-28,Amazon Elastic Load Balancing,us-east-1,2382.51,1744.59,60
+2025-11-29,Amazon Elastic Compute Cloud,eu-west-1,9998.31,661.73,61
+2025-11-29,Amazon Relational Database Service,us-west-2,1824.83,758.55,59
+2025-11-29,Amazon Simple Storage Service,us-west-2,5164.32,1301.37,37
+2025-11-29,Amazon DynamoDB,us-west-2,7352.91,977.41,13
+2025-11-29,AWS Lambda,us-east-1,8344.01,1837.66,53
+2025-11-29,Amazon CloudFront,eu-west-1,4384.47,180.13,20
+2025-11-29,Amazon ElastiCache,us-west-2,3767.45,1751.96,12
+2025-11-29,Amazon Elastic Load Balancing,ap-southeast-1,4831.45,851.81,66
+2025-11-30,Amazon Elastic Compute Cloud,us-west-2,7329.58,1130.38,87
+2025-11-30,Amazon Relational Database Service,us-east-1,4859.95,255.03,87
+2025-11-30,Amazon Simple Storage Service,ap-southeast-1,8078.01,1908.17,51
+2025-11-30,Amazon DynamoDB,us-east-1,4692.68,747.1,97
+2025-11-30,AWS Lambda,eu-west-1,1445.15,1572.74,51
+2025-11-30,Amazon CloudFront,ap-southeast-1,2672.6,1735.84,75
+2025-11-30,Amazon ElastiCache,eu-west-1,8022.4,1604.77,81
+2025-11-30,Amazon Elastic Load Balancing,us-east-1,5765.78,1401.57,66
+2025-12-01,Amazon Elastic Compute Cloud,us-west-2,852.91,1488.91,70
+2025-12-01,Amazon Relational Database Service,us-east-1,2167.72,646.63,81
+2025-12-01,Amazon Simple Storage Service,eu-west-1,5041.31,887.02,42
+2025-12-01,Amazon DynamoDB,us-west-2,1300.1,800.96,20
+2025-12-01,AWS Lambda,us-east-1,9407.66,616.46,11
+2025-12-01,Amazon CloudFront,us-west-2,2404.61,741.26,42
+2025-12-01,Amazon ElastiCache,eu-west-1,9178.83,377.66,31
+2025-12-01,Amazon Elastic Load Balancing,ap-southeast-1,7881.39,1722.56,51
+2025-12-02,Amazon Elastic Compute Cloud,us-west-2,5492.93,1819.06,74
+2025-12-02,Amazon Relational Database Service,us-east-1,6063.46,763.86,8
+2025-12-02,Amazon Simple Storage Service,eu-west-1,1217.94,1369.87,75
+2025-12-02,Amazon DynamoDB,us-west-2,2199.43,1841.49,23
+2025-12-02,AWS Lambda,us-east-1,2267.55,284.33,32
+2025-12-02,Amazon CloudFront,us-east-1,1901.81,1408.75,65
+2025-12-02,Amazon ElastiCache,eu-west-1,9492.37,246.97,99
+2025-12-02,Amazon Elastic Load Balancing,us-west-2,1167.25,1643.08,93
+2025-12-03,Amazon Elastic Compute Cloud,ap-southeast-1,5434.71,857.26,10
+2025-12-03,Amazon Relational Database Service,us-east-1,5393.38,1224.03,79
+2025-12-03,Amazon Simple Storage Service,us-east-1,425.41,326.56,83
+2025-12-03,Amazon DynamoDB,us-west-2,9528.16,1550.27,40
+2025-12-03,AWS Lambda,us-west-2,117.02,1528.91,72
+2025-12-03,Amazon CloudFront,eu-west-1,5403.41,637.27,24
+2025-12-03,Amazon ElastiCache,us-east-1,3784.15,1373.83,91
+2025-12-03,Amazon Elastic Load Balancing,ap-southeast-1,8625.35,511.17,44
+2025-12-04,Amazon Elastic Compute Cloud,eu-west-1,341.66,1604.02,83
+2025-12-04,Amazon Relational Database Service,ap-southeast-1,6297.51,1282.77,84
+2025-12-04,Amazon Simple Storage Service,us-west-2,516.11,1181.74,24
+2025-12-04,Amazon DynamoDB,us-east-1,3116.73,1116.26,8
+2025-12-04,AWS Lambda,us-west-2,9647.14,1946.09,44
+2025-12-04,Amazon CloudFront,eu-west-1,5240.08,1543.06,58
+2025-12-04,Amazon ElastiCache,eu-west-1,5957.14,1575.55,59
+2025-12-04,Amazon Elastic Load Balancing,eu-west-1,6302.77,185.96,66
+2025-12-05,Amazon Elastic Compute Cloud,us-east-1,8436.78,860.81,33
+2025-12-05,Amazon Relational Database Service,eu-west-1,5462.22,278.41,67
+2025-12-05,Amazon Simple Storage Service,ap-southeast-1,5778.21,1313.27,10
+2025-12-05,Amazon DynamoDB,ap-southeast-1,2031.93,1891.27,85
+2025-12-05,AWS Lambda,us-east-1,5323.02,603.6,92
+2025-12-05,Amazon CloudFront,us-west-2,7133.8,221.63,81
+2025-12-05,Amazon ElastiCache,us-west-2,8227.17,1673.48,48
+2025-12-05,Amazon Elastic Load Balancing,eu-west-1,8658.33,237.6,82

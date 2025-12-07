@@ -27,11 +27,34 @@ This repository contains the blueprints for two "Cool GenAI Projects" for a FinO
     *   *Input:* "Untagged Volume X started at 10:00 AM. At 10:00 AM, Project 'Payments' launched 5 instances."
     *   *Output:* "95% Confidence Volume X belongs to Project 'Payments'."
 
-## Files in this Repo
+## Repository Structure
 
-*   **`athena_architecture_inference.sql`**: SQL queries to detect architectural cost anomalies.
-*   **`athena_tagging_correlation.sql`**: SQL queries to correlate untagged resources with tagged ones.
-*   **`genai_agent_logic.py`**: A Python prototype demonstrating how an Agent constructs prompts from the SQL data and interprets the results.
+```
+finops-genai-agent/
+├── streamlit_app.py              # Main Streamlit application
+├── intelligent_agent.py          # Smart AWS service detection agent
+├── enhanced_agent.py             # Production agent with DuckDB
+├── analytics_dashboard.py        # Usage analytics dashboard
+├── requirements.txt              # Python dependencies
+├── start.sh / start.bat          # Quick start scripts
+├── Dockerfile                    # Container deployment
+├── docker-compose.yml            # Docker orchestration
+├── sql/                          # SQL query templates
+│   ├── athena_architecture_inference.sql
+│   └── athena_tagging_correlation.sql
+├── scripts/                      # Utility scripts
+│   ├── setup_aws.py             # AWS infrastructure setup
+│   ├── setup.sh / setup.bat     # Environment setup
+│   └── generate_sample_data.py  # Test data generator
+├── sample_data/                  # Sample CSV files for testing
+├── docs/                         # Documentation
+│   ├── QUICKSTART.md
+│   ├── RUN_LOCALLY.md
+│   ├── TROUBLESHOOTING.md
+│   ├── ENHANCEMENTS.md
+│   └── ... (more docs)
+└── .github/workflows/            # CI/CD pipelines
+```
 
 ## How to Run the Prototype
 
@@ -85,24 +108,26 @@ cp .env.example .env
 # Edit .env with your AWS credentials
 
 # 5. Setup AWS infrastructure
-python setup_aws.py
+python scripts/setup_aws.py
 
 # 6. Run the app
 streamlit run streamlit_app.py
 ```
 
-**See [RUN_LOCALLY.md](RUN_LOCALLY.md) for detailed instructions.**
+**See [docs/RUN_LOCALLY.md](docs/RUN_LOCALLY.md) for detailed instructions.**
 
 **Documentation:**
-- [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
-- [Virtual Environment Guide](VIRTUAL_ENV_GUIDE.md) - Complete venv setup instructions
-- [Full Documentation](README_STREAMLIT.md) - Complete feature guide
-- [Deployment Guide](DEPLOYMENT.md) - Production deployment options
+- [Quick Start Guide](docs/QUICKSTART.md) - Get running in 5 minutes
+- [Run Locally Guide](docs/RUN_LOCALLY.md) - Detailed local setup
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Full Documentation](docs/README_STREAMLIT.md) - Complete feature guide
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment options
+- [Enhancements](docs/ENHANCEMENTS.md) - New features and improvements
 
 **Generate Sample Data (for testing):**
 
 ```bash
-python generate_sample_data.py
+python scripts/generate_sample_data.py
 ```
 
-This creates sample CSV files you can upload to test the app without running actual Athena queries.
+This creates sample CSV files in `sample_data/` that you can upload to test the app without running actual Athena queries.

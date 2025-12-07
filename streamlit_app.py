@@ -490,11 +490,11 @@ def main():
         tab1, tab2, tab3 = st.tabs(["Architecture Analysis", "Tagging Analysis", "Cost Analysis"])
         
         with tab1:
-            with open('athena_architecture_inference.sql', 'r') as f:
+            with open('sql/athena_architecture_inference.sql', 'r') as f:
                 st.code(f.read(), language='sql')
         
         with tab2:
-            with open('athena_tagging_correlation.sql', 'r') as f:
+            with open('sql/athena_tagging_correlation.sql', 'r') as f:
                 st.code(f.read(), language='sql')
         
         with tab3:

@@ -1,5 +1,6 @@
 # Environment variables
 .env
+.env.local
 
 # Python
 __pycache__/
@@ -22,11 +23,14 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Virtual environments
 venv/
 ENV/
 env/
+.venv/
 
 # IDE
 .vscode/
@@ -34,22 +38,74 @@ env/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
+.settings/
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+*~
 
 # Streamlit
 .streamlit/
+.streamlit/secrets.toml
 
 # Logs
 *.log
+logs/
 
 # Data files (don't commit uploaded CSVs)
 *.csv
 data/
 uploads/
+temp/
+tmp/
+
+# Sample data (keep in repo)
+!sample_data/*.csv
 
 # AWS
 .aws/
 credentials
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation builds
+docs/_build/
+site/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
