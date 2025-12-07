@@ -46,11 +46,14 @@ This will run a simulation showing how the SQL data is fed into an LLM prompt to
 ### Option 2: Interactive Streamlit App (Recommended)
 
 We've built a full-featured Streamlit application with:
+- 🧠 **Intelligent Agent** - Works with ANY AWS service SQL output
+- 🔍 **Auto-Detection** - Automatically identifies AWS service from your data
+- 💡 **Smart Questions** - Generates contextual questions based on your data
 - 📁 CSV upload for Athena query results
 - 💬 Interactive chat interface powered by AWS Bedrock (Claude 3)
 - 📊 Auto-generated visualizations and insights
-- 🧠 Learning capabilities that improve over time
-- 💡 Smart prompt suggestions based on your data
+- 📈 Automatic data profiling and summary tables
+- 🎯 Learning capabilities that improve over time
 
 **Quick Start:**
 
