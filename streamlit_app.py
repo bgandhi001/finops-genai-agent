@@ -124,10 +124,28 @@ def generate_suggested_prompts(data_summary, analysis_type):
     
     return prompts
 
+def make_json_serializable(obj):
+    """Convert non-JSON-serializable objects to serializable format"""
+    if isinstance(obj, dict):
+        return {k: make_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [make_json_serializable(item) for item in obj]
+    elif isinstance(obj, (pd.Timestamp, datetime)):
+        return obj.isoformat()
+    elif pd.isna(obj):
+        return None
+    elif hasattr(obj, 'item'):  # numpy types
+        return obj.item()
+    else:
+        return obj
+
 def call_bedrock_llm(prompt, context_data, chat_history):
     """Call AWS Bedrock with Claude for analysis using intelligent agent"""
     try:
         bedrock = get_bedrock_client()
+        
+        # Make context data JSON serializable
+        context_data = make_json_serializable(context_data)
         
         # Use intelligent agent to generate enhanced prompt
         agent = st.session_state.intelligent_agent
