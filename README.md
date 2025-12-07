@@ -35,8 +35,45 @@ This repository contains the blueprints for two "Cool GenAI Projects" for a FinO
 
 ## How to Run the Prototype
 
+### Option 1: Command Line Prototype
+
 ```bash
 python3 genai_agent_logic.py
 ```
 
 This will run a simulation showing how the SQL data is fed into an LLM prompt to generate insights.
+
+### Option 2: Interactive Streamlit App (Recommended)
+
+We've built a full-featured Streamlit application with:
+- 📁 CSV upload for Athena query results
+- 💬 Interactive chat interface powered by AWS Bedrock (Claude 3)
+- 📊 Auto-generated visualizations and insights
+- 🧠 Learning capabilities that improve over time
+- 💡 Smart prompt suggestions based on your data
+
+**Quick Start:**
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Setup AWS infrastructure
+python setup_aws.py
+
+# Run the app
+streamlit run streamlit_app.py
+```
+
+**Documentation:**
+- [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
+- [Full Documentation](README_STREAMLIT.md) - Complete feature guide
+- [Deployment Guide](DEPLOYMENT.md) - Production deployment options
+
+**Generate Sample Data (for testing):**
+
+```bash
+python generate_sample_data.py
+```
+
+This creates sample CSV files you can upload to test the app without running actual Athena queries.
