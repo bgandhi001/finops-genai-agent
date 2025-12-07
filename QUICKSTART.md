@@ -8,13 +8,28 @@ Get up and running in 5 minutes!
 - AWS Account
 - AWS CLI configured
 
-## Step 1: Clone & Install (2 min)
+## Step 1: Clone & Setup Virtual Environment (2 min)
 
 ```bash
+# Clone the repository
 git clone https://github.com/bgandhi001/finops-genai-agent.git
 cd finops-genai-agent
+
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+
+# On Windows:
+# venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
+
+**Note**: Always activate the virtual environment before running the app!
 
 ## Step 2: Configure AWS (1 min)
 
@@ -47,10 +62,18 @@ This creates:
 ## Step 5: Run the App! (30 sec)
 
 ```bash
+# Make sure virtual environment is activated
+# You should see (venv) in your terminal prompt
+
 streamlit run streamlit_app.py
 ```
 
 Opens at: http://localhost:8501
+
+**Tip**: To deactivate the virtual environment when done:
+```bash
+deactivate
+```
 
 ## Step 6: Try It Out
 

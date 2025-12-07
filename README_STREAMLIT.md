@@ -48,10 +48,23 @@ git clone https://github.com/bgandhi001/finops-genai-agent.git
 cd finops-genai-agent
 ```
 
-2. **Install dependencies**
+2. **Create virtual environment (recommended)**
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate  # macOS/Linux
+# OR
+venv\Scripts\activate     # Windows
+```
+
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
+
+**Note:** See [VIRTUAL_ENV_GUIDE.md](VIRTUAL_ENV_GUIDE.md) for detailed virtual environment instructions.
 
 3. **Configure AWS credentials**
 ```bash
@@ -78,10 +91,13 @@ This will:
 ### Running the Application
 
 ```bash
+# Make sure virtual environment is activated (you should see (venv) in prompt)
 streamlit run streamlit_app.py
 ```
 
 The app will open in your browser at `http://localhost:8501`
+
+**Tip:** To stop the app, press `Ctrl+C` in the terminal. To deactivate the virtual environment: `deactivate`
 
 ## 📖 Usage Guide
 

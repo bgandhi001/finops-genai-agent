@@ -4,8 +4,34 @@
 
 ### Option 1: Local Development (Fastest)
 
+#### Using Virtual Environment (Recommended)
+
 ```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # macOS/Linux
+# OR
+venv\Scripts\activate     # Windows
+
 # Install dependencies
+pip install -r requirements.txt
+
+# Setup AWS resources
+python setup_aws.py
+
+# Run the app
+streamlit run streamlit_app.py
+
+# When done, deactivate
+deactivate
+```
+
+#### Using System Python (Not Recommended)
+
+```bash
+# Install dependencies globally
 pip install -r requirements.txt
 
 # Setup AWS resources

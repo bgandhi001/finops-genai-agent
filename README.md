@@ -55,6 +55,10 @@ We've built a full-featured Streamlit application with:
 **Quick Start:**
 
 ```bash
+# Create and activate virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
 
@@ -67,6 +71,7 @@ streamlit run streamlit_app.py
 
 **Documentation:**
 - [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
+- [Virtual Environment Guide](VIRTUAL_ENV_GUIDE.md) - Complete venv setup instructions
 - [Full Documentation](README_STREAMLIT.md) - Complete feature guide
 - [Deployment Guide](DEPLOYMENT.md) - Production deployment options
 
