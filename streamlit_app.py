@@ -9,6 +9,7 @@ from io import StringIO
 import os
 from pathlib import Path
 from intelligent_agent import IntelligentAWSAgent
+from enhanced_agent import EnhancedAWSAgent
 
 # Load environment variables from .env file
 def load_env_file():
@@ -55,7 +56,10 @@ def init_session_state():
     if 'file_upload_count' not in st.session_state:
         st.session_state.file_upload_count = 0
     if 'intelligent_agent' not in st.session_state:
-        st.session_state.intelligent_agent = IntelligentAWSAgent()
+        # Use EnhancedAWSAgent for better performance and scalability
+        st.session_state.intelligent_agent = EnhancedAWSAgent()
+    if 'use_enhanced_agent' not in st.session_state:
+        st.session_state.use_enhanced_agent = True
 
 def analyze_uploaded_data(df):
     """Analyze uploaded data using intelligent agent"""
@@ -387,7 +391,26 @@ def main():
             st.info("👆 Upload to start")
     
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+        # Save uploaded file temporarily for DuckDB
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
+            tmp_file.write(uploaded_file.getvalue())
+            tmp_file_path = tmp_file.name
+        
+        # Use enhanced agent to load data (handles large files efficiently)
+        agent = st.session_state.intelligent_agent
+        if isinstance(agent, EnhancedAWSAgent):
+            success = agent.load_data_from_file(tmp_file_path)
+            if success:
+                df = agent.data  # Get sample for display
+            else:
+                st.error("Failed to load data")
+                return
+        else:
+            # Fallback to pandas for original agent
+            df = pd.read_csv(uploaded_file)
+            agent.analyze_data(df)
+        
         st.session_state.uploaded_data = df
         st.session_state.data_summary = analyze_uploaded_data(df)
         
@@ -531,6 +554,31 @@ LIMIT 20;
     
     # Chat interface with better styling
     st.subheader("💬 Interactive Analysis")
+    
+    # Add SQL query option for enhanced agent
+    agent = st.session_state.intelligent_agent
+    if isinstance(agent, EnhancedAWSAgent):
+        with st.expander("🔧 Advanced: Execute SQL Query", expanded=False):
+            st.caption("Write custom SQL queries for precise analysis")
+            sql_query = st.text_area(
+                "SQL Query",
+                placeholder="SELECT service, SUM(cost) as total_cost FROM aws_data GROUP BY service ORDER BY total_cost DESC LIMIT 10",
+                height=100
+            )
+            if st.button("Execute SQL"):
+                if sql_query:
+                    result, error = agent.execute_sql(sql_query)
+                    if error:
+                        st.error(f"SQL Error: {error}")
+                    else:
+                        st.success("Query executed successfully!")
+                        st.dataframe(result, use_container_width=True)
+                        
+                        # Try to visualize if possible
+                        if len(result.columns) >= 2:
+                            fig = px.bar(result, x=result.columns[0], y=result.columns[1])
+                            st.plotly_chart(fig, use_container_width=True)
+    
     st.caption("Ask questions about your data or click a suggested question above")
     
     # Display chat history
@@ -605,6 +653,24 @@ LIMIT 20;
                     'analysis_type': analysis_type,
                     'data_summary': summary
                 })
+    
+    # Actionable recommendations section (for enhanced agent)
+    if isinstance(agent, EnhancedAWSAgent) and st.session_state.chat_history:
+        st.markdown("---")
+        st.subheader("🛠️ Actionable Recommendations")
+        
+        # Generate AWS CLI commands based on analysis
+        last_response = st.session_state.chat_history[-1].get('content', '') if st.session_state.chat_history else ''
+        commands = agent.generate_aws_cli_commands(last_response)
+        
+        if commands:
+            st.caption("Ready-to-use AWS CLI commands based on your analysis")
+            for cmd in commands:
+                with st.expander(f"⚡ {cmd['action']}", expanded=False):
+                    st.markdown(f"**Description:** {cmd['description']}")
+                    st.markdown(f"**Risk Level:** `{cmd['risk']}`")
+                    st.code(cmd['command'], language='bash')
+                    st.warning("⚠️ Always review commands before executing in production!")
     
     # Visualization section
     st.markdown("---")
