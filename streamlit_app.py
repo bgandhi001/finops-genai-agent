@@ -35,6 +35,12 @@ def get_dynamodb_client():
 
 # Initialize session state
 def init_session_state():
+    if 'session_id' not in st.session_state:
+        import uuid
+        st.session_state.session_id = str(uuid.uuid4())
+        st.session_state.session_start = datetime.now()
+        log_session_start()
+    
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
     if 'uploaded_data' not in st.session_state:
@@ -43,6 +49,10 @@ def init_session_state():
         st.session_state.data_summary = None
     if 'user_preferences' not in st.session_state:
         st.session_state.user_preferences = {}
+    if 'query_count' not in st.session_state:
+        st.session_state.query_count = 0
+    if 'file_upload_count' not in st.session_state:
+        st.session_state.file_upload_count = 0
 
 def analyze_uploaded_data(df):
     """Analyze uploaded data and generate summary"""
@@ -144,25 +154,135 @@ Format your response in markdown with clear sections."""
     except Exception as e:
         return f"⚠️ Error calling Bedrock: {str(e)}\n\nPlease ensure AWS credentials are configured and Bedrock is enabled."
 
-def save_interaction_to_dynamodb(user_query, agent_response, data_context):
-    """Save user interactions for learning"""
+def log_session_start():
+    """Log session start event"""
     try:
         dynamodb = get_dynamodb_client()
         table_name = os.getenv('DYNAMODB_TABLE', 'finops-agent-interactions')
         table = dynamodb.Table(table_name)
         
         item = {
-            'interaction_id': f"{datetime.now().timestamp()}",
+            'interaction_id': f"session_{st.session_state.session_id}",
             'timestamp': datetime.now().isoformat(),
-            'user_query': user_query,
-            'agent_response': agent_response,
-            'data_context': json.dumps(data_context),
-            'session_id': st.session_state.get('session_id', 'unknown')
+            'event_type': 'session_start',
+            'session_id': st.session_state.session_id,
+            'session_start': st.session_state.session_start.isoformat(),
+            'user_agent': 'streamlit_app',
+            'ttl': int((datetime.now().timestamp() + 90*24*60*60))  # 90 days retention
         }
         
         table.put_item(Item=item)
     except Exception as e:
-        st.warning(f"Could not save interaction: {str(e)}")
+        pass  # Silent fail for logging
+
+def log_file_upload(file_info):
+    """Log file upload event"""
+    try:
+        dynamodb = get_dynamodb_client()
+        table_name = os.getenv('DYNAMODB_TABLE', 'finops-agent-interactions')
+        table = dynamodb.Table(table_name)
+        
+        st.session_state.file_upload_count += 1
+        
+        item = {
+            'interaction_id': f"upload_{st.session_state.session_id}_{st.session_state.file_upload_count}",
+            'timestamp': datetime.now().isoformat(),
+            'event_type': 'file_upload',
+            'session_id': st.session_state.session_id,
+            'file_name': file_info.get('name', 'unknown'),
+            'file_size': file_info.get('size', 0),
+            'row_count': file_info.get('rows', 0),
+            'column_count': file_info.get('columns', 0),
+            'analysis_type': file_info.get('analysis_type', 'unknown'),
+            'ttl': int((datetime.now().timestamp() + 90*24*60*60))
+        }
+        
+        table.put_item(Item=item)
+    except Exception as e:
+        pass
+
+def log_user_query(user_query, query_metadata):
+    """Log user query event"""
+    try:
+        dynamodb = get_dynamodb_client()
+        table_name = os.getenv('DYNAMODB_TABLE', 'finops-agent-interactions')
+        table = dynamodb.Table(table_name)
+        
+        st.session_state.query_count += 1
+        
+        item = {
+            'interaction_id': f"query_{st.session_state.session_id}_{st.session_state.query_count}",
+            'timestamp': datetime.now().isoformat(),
+            'event_type': 'user_query',
+            'session_id': st.session_state.session_id,
+            'user_query': user_query,
+            'query_length': len(user_query),
+            'is_suggested_prompt': query_metadata.get('is_suggested', False),
+            'analysis_type': query_metadata.get('analysis_type', 'unknown'),
+            'has_data': query_metadata.get('has_data', False),
+            'ttl': int((datetime.now().timestamp() + 90*24*60*60))
+        }
+        
+        table.put_item(Item=item)
+    except Exception as e:
+        pass
+
+def log_agent_response(user_query, agent_response, response_metadata):
+    """Log agent response with analytics"""
+    try:
+        dynamodb = get_dynamodb_client()
+        table_name = os.getenv('DYNAMODB_TABLE', 'finops-agent-interactions')
+        table = dynamodb.Table(table_name)
+        
+        item = {
+            'interaction_id': f"response_{st.session_state.session_id}_{st.session_state.query_count}",
+            'timestamp': datetime.now().isoformat(),
+            'event_type': 'agent_response',
+            'session_id': st.session_state.session_id,
+            'user_query': user_query,
+            'agent_response': agent_response[:1000],  # Truncate for storage
+            'response_length': len(agent_response),
+            'processing_time': response_metadata.get('processing_time', 0),
+            'has_visualization': response_metadata.get('has_visualization', False),
+            'analysis_type': response_metadata.get('analysis_type', 'unknown'),
+            'data_summary': json.dumps(response_metadata.get('data_summary', {})),
+            'ttl': int((datetime.now().timestamp() + 90*24*60*60))
+        }
+        
+        table.put_item(Item=item)
+    except Exception as e:
+        pass
+
+def log_session_end():
+    """Log session end event with summary"""
+    try:
+        dynamodb = get_dynamodb_client()
+        table_name = os.getenv('DYNAMODB_TABLE', 'finops-agent-interactions')
+        table = dynamodb.Table(table_name)
+        
+        session_duration = (datetime.now() - st.session_state.session_start).total_seconds()
+        
+        item = {
+            'interaction_id': f"session_end_{st.session_state.session_id}",
+            'timestamp': datetime.now().isoformat(),
+            'event_type': 'session_end',
+            'session_id': st.session_state.session_id,
+            'session_duration': session_duration,
+            'total_queries': st.session_state.query_count,
+            'total_uploads': st.session_state.file_upload_count,
+            'chat_messages': len(st.session_state.chat_history),
+            'ttl': int((datetime.now().timestamp() + 90*24*60*60))
+        }
+        
+        table.put_item(Item=item)
+    except Exception as e:
+        pass
+
+def save_interaction_to_dynamodb(user_query, agent_response, data_context):
+    """Save user interactions for learning (legacy function - now uses detailed logging)"""
+    # This function is kept for backward compatibility
+    # New code should use log_agent_response instead
+    pass
 
 def create_cost_visualization(df, chart_type="bar"):
     """Generate visualizations based on data"""
@@ -236,10 +356,34 @@ def main():
             df = pd.read_csv(uploaded_file)
             st.session_state.uploaded_data = df
             st.session_state.data_summary = analyze_uploaded_data(df)
+            
+            # Log file upload
+            log_file_upload({
+                'name': uploaded_file.name,
+                'size': uploaded_file.size,
+                'rows': len(df),
+                'columns': len(df.columns),
+                'analysis_type': analysis_type
+            })
+            
             st.success(f"✅ Loaded {len(df)} rows")
             
             with st.expander("📊 Data Preview"):
                 st.dataframe(df.head(10), use_container_width=True)
+        
+        st.markdown("---")
+        
+        # Session Info
+        with st.expander("📊 Session Info"):
+            session_duration = (datetime.now() - st.session_state.session_start).total_seconds()
+            st.metric("Session Duration", f"{int(session_duration // 60)}m {int(session_duration % 60)}s")
+            st.metric("Queries Made", st.session_state.query_count)
+            st.metric("Files Uploaded", st.session_state.file_upload_count)
+            st.caption(f"Session ID: {st.session_state.session_id[:8]}...")
+            
+            if st.button("End Session"):
+                log_session_end()
+                st.success("Session logged!")
         
         st.markdown("---")
         
@@ -321,6 +465,14 @@ def main():
         del st.session_state.current_prompt
     
     if user_input:
+        # Log user query
+        is_suggested = 'current_prompt' in st.session_state
+        log_user_query(user_input, {
+            'is_suggested': is_suggested,
+            'analysis_type': analysis_type,
+            'has_data': st.session_state.uploaded_data is not None
+        })
+        
         # Add user message
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         
@@ -330,6 +482,8 @@ def main():
         # Generate response
         with st.chat_message("assistant"):
             with st.spinner("🤔 Analyzing..."):
+                start_time = datetime.now()
+                
                 # Prepare context
                 context_data = {
                     "summary": summary,
@@ -340,10 +494,13 @@ def main():
                 # Get LLM response
                 response = call_bedrock_llm(user_input, context_data, st.session_state.chat_history)
                 
+                processing_time = (datetime.now() - start_time).total_seconds()
+                
                 st.markdown(response)
                 
                 # Generate visualization if requested
-                if any(word in user_input.lower() for word in ['chart', 'graph', 'visualize', 'show', 'plot']):
+                has_viz = any(word in user_input.lower() for word in ['chart', 'graph', 'visualize', 'show', 'plot'])
+                if has_viz:
                     chart = create_cost_visualization(st.session_state.uploaded_data, "bar")
                     if chart:
                         st.plotly_chart(chart, use_container_width=True, key=f"response_chart_{len(st.session_state.chat_history)}")
@@ -357,8 +514,13 @@ def main():
                 else:
                     st.session_state.chat_history.append({"role": "assistant", "content": response})
                 
-                # Save interaction for learning
-                save_interaction_to_dynamodb(user_input, response, context_data)
+                # Log agent response with metadata
+                log_agent_response(user_input, response, {
+                    'processing_time': processing_time,
+                    'has_visualization': has_viz and chart is not None,
+                    'analysis_type': analysis_type,
+                    'data_summary': summary
+                })
     
     # Visualization section
     st.markdown("---")
