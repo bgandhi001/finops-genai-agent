@@ -306,11 +306,11 @@ def main():
     st.subheader("💬 Chat with Agent")
     
     # Display chat history
-    for message in st.session_state.chat_history:
+    for idx, message in enumerate(st.session_state.chat_history):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if "chart" in message:
-                st.plotly_chart(message["chart"], use_container_width=True)
+                st.plotly_chart(message["chart"], use_container_width=True, key=f"chat_chart_{idx}")
     
     # Chat input
     user_input = st.chat_input("Ask me anything about your FinOps data...")
@@ -346,7 +346,7 @@ def main():
                 if any(word in user_input.lower() for word in ['chart', 'graph', 'visualize', 'show', 'plot']):
                     chart = create_cost_visualization(st.session_state.uploaded_data, "bar")
                     if chart:
-                        st.plotly_chart(chart, use_container_width=True)
+                        st.plotly_chart(chart, use_container_width=True, key=f"response_chart_{len(st.session_state.chat_history)}")
                         st.session_state.chat_history.append({
                             "role": "assistant",
                             "content": response,
@@ -369,12 +369,12 @@ def main():
     with viz_col1:
         chart1 = create_cost_visualization(st.session_state.uploaded_data, "bar")
         if chart1:
-            st.plotly_chart(chart1, use_container_width=True)
+            st.plotly_chart(chart1, use_container_width=True, key="viz_bar_chart")
     
     with viz_col2:
         chart2 = create_cost_visualization(st.session_state.uploaded_data, "pie")
         if chart2:
-            st.plotly_chart(chart2, use_container_width=True)
+            st.plotly_chart(chart2, use_container_width=True, key="viz_pie_chart")
 
 if __name__ == "__main__":
     main()
