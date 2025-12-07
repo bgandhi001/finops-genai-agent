@@ -729,35 +729,99 @@ def main():
         # Show helpful information when no data is uploaded
         st.markdown("---")
         
-        st.markdown("""
-        ### 🚀 How It Works
+        # Quick start info
+        st.info("👆 **Get Started:** Upload a CSV file above to begin analyzing your AWS costs and resources with AI-powered insights!")
         
-        1. **Upload** - Upload any CSV file from AWS Athena, Cost Explorer, or AWS service queries
-        2. **Auto-Detect** - The intelligent agent automatically identifies your AWS service
-        3. **Smart Questions** - Get contextual questions tailored to your specific data
-        4. **AI Analysis** - Ask questions and receive detailed insights powered by AWS Bedrock
-        5. **Visualizations** - Automatic charts and graphs for better understanding
+        # How it works - in expander
+        with st.expander("🚀 How It Works", expanded=False):
+            st.markdown("""
+            1. **Upload** - Upload any CSV file from AWS Athena, Cost Explorer, or AWS service queries
+            2. **Auto-Detect** - The intelligent agent automatically identifies your AWS service
+            3. **Smart Questions** - Get contextual questions tailored to your specific data
+            4. **AI Analysis** - Ask questions and receive detailed insights powered by AWS Bedrock
+            5. **Visualizations** - Automatic charts and graphs for better understanding
+            6. **SQL Examples** - Get pre-built SQL queries tailored to your data structure
+            7. **Multi-File Support** - Upload multiple files and merge them intelligently
+            """)
         
-        ### 📊 Supported AWS Services
+        # Supported services - in expander
+        with st.expander("📊 Supported AWS Services & Data Sources", expanded=False):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("""
+                **Compute & Containers:**
+                - EC2 Instances
+                - Lambda Functions
+                - ECS/EKS Clusters
+                - Elastic Beanstalk
+                
+                **Storage:**
+                - S3 Buckets
+                - EBS Volumes
+                - EFS File Systems
+                - Glacier Archives
+                
+                **Database:**
+                - RDS Instances
+                - DynamoDB Tables
+                - Redshift Clusters
+                - ElastiCache
+                """)
+            
+            with col2:
+                st.markdown("""
+                **Networking:**
+                - VPC Resources
+                - CloudFront Distributions
+                - Route53 Zones
+                - Load Balancers
+                - NAT Gateways
+                
+                **Cost & Optimization:**
+                - Cost & Usage Reports (CUR)
+                - Cost Explorer Exports
+                - Trusted Advisor Reports
+                - Cost Optimization Hub
+                - Compute Optimizer
+                - Savings Plans
+                - Reserved Instances
+                """)
         
-        The agent works with **20+ AWS services** including:
-        - **Compute**: EC2, Lambda, ECS, EKS
-        - **Storage**: S3, EBS, EFS
-        - **Database**: RDS, DynamoDB, Redshift
-        - **Networking**: VPC, CloudFront, Route53, ELB
-        - **Cost**: Cost & Usage Reports, Cost Explorer
-        - **And many more...**
+        # Features - in expander
+        with st.expander("💡 Key Features", expanded=False):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("""
+                **Intelligence:**
+                - ✅ Automatic service detection
+                - ✅ Smart, contextual questions
+                - ✅ Multi-file upload & merging
+                - ✅ SQL query examples
+                
+                **Analysis:**
+                - ✅ Cost optimization recommendations
+                - ✅ Performance insights
+                - ✅ Trend analysis
+                - ✅ Resource waste detection
+                """)
+            
+            with col2:
+                st.markdown("""
+                **Visualization:**
+                - ✅ Interactive charts
+                - ✅ Auto-generated visualizations
+                - ✅ Custom SQL execution
+                - ✅ Downloadable results
+                
+                **Learning:**
+                - ✅ Learns from your queries
+                - ✅ Improves over time
+                - ✅ Usage analytics
+                - ✅ Pattern recognition
+                """)
         
-        ### 💡 What You Get
-        
-        - ✅ Automatic service detection
-        - ✅ Smart, contextual questions
-        - ✅ Cost optimization recommendations
-        - ✅ Performance insights
-        - ✅ Interactive visualizations
-        - ✅ Actionable recommendations
-        - ✅ AWS best practices
-        """)
         
         st.markdown("---")
         
