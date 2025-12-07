@@ -354,137 +354,184 @@ def main():
     
     init_session_state()
     
-    # Sidebar
-    with st.sidebar:
-        st.title("💰 FinOps GenAI Agent")
-        st.markdown("---")
-        
-        # Analysis type selection
-        analysis_type = st.selectbox(
-            "Analysis Type",
-            ["Architecture Inference", "Tagging Analysis", "General Cost Analysis"]
-        )
-        
-        st.markdown("---")
-        
-        # File upload
-        st.subheader("📁 Upload SQL Output")
-        uploaded_file = st.file_uploader(
-            "Upload CSV file from Athena query",
-            type=['csv'],
-            help="Upload the output from your Athena SQL queries"
-        )
-        
-        if uploaded_file:
-            df = pd.read_csv(uploaded_file)
-            st.session_state.uploaded_data = df
-            st.session_state.data_summary = analyze_uploaded_data(df)
-            
-            # Log file upload
-            log_file_upload({
-                'name': uploaded_file.name,
-                'size': uploaded_file.size,
-                'rows': len(df),
-                'columns': len(df.columns),
-                'analysis_type': analysis_type
-            })
-            
-            st.success(f"✅ Loaded {len(df)} rows")
-            
-            with st.expander("📊 Data Preview"):
-                st.dataframe(df.head(10), use_container_width=True)
-        
-        st.markdown("---")
-        
-        # Session Info
-        with st.expander("📊 Session Info"):
-            session_duration = (datetime.now() - st.session_state.session_start).total_seconds()
-            st.metric("Session Duration", f"{int(session_duration // 60)}m {int(session_duration % 60)}s")
-            st.metric("Queries Made", st.session_state.query_count)
-            st.metric("Files Uploaded", st.session_state.file_upload_count)
-            st.caption(f"Session ID: {st.session_state.session_id[:8]}...")
-            
-            if st.button("End Session"):
-                log_session_end()
-                st.success("Session logged!")
-        
-        st.markdown("---")
-        
-        # AWS Configuration
-        with st.expander("⚙️ AWS Configuration"):
-            aws_region = st.text_input("AWS Region", value="us-east-1")
-            dynamodb_table = st.text_input("DynamoDB Table", value="finops-agent-interactions")
-            
-            if st.button("Save Config"):
-                os.environ['AWS_REGION'] = aws_region
-                os.environ['DYNAMODB_TABLE'] = dynamodb_table
-                st.success("Configuration saved!")
+    # Header with info
+    st.markdown("""
+    <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1f77b4;">💰 FinOps GenAI Agent</h2>
+        <p style="margin: 10px 0 0 0; color: #555;">
+            <strong>Intelligent AWS Cost Analysis powered by AI</strong><br>
+            Upload any AWS service SQL output and get instant insights, cost optimization recommendations, 
+            and actionable analysis. The agent automatically detects your AWS service and generates 
+            contextual questions tailored to your data.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Main content
-    st.title("🤖 FinOps GenAI Agent - Interactive Analysis")
+    # File upload section (main page)
+    st.subheader("📁 Upload Your Data")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        uploaded_file = st.file_uploader(
+            "Upload CSV file from Athena query or any AWS service SQL output",
+            type=['csv'],
+            help="Supports EC2, S3, RDS, Lambda, DynamoDB, Cost & Usage Reports, and 20+ AWS services"
+        )
+    
+    with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if uploaded_file:
+            st.success("✅ File loaded")
+        else:
+            st.info("👆 Upload to start")
+    
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+        st.session_state.uploaded_data = df
+        st.session_state.data_summary = analyze_uploaded_data(df)
+        
+        # Get analysis type from intelligent agent
+        analysis_type = st.session_state.data_summary.get('aws_service', 'General Analysis')
+        
+        # Log file upload
+        log_file_upload({
+            'name': uploaded_file.name,
+            'size': uploaded_file.size,
+            'rows': len(df),
+            'columns': len(df.columns),
+            'analysis_type': analysis_type
+        })
+        
+        # Data preview in expander
+        with st.expander("👁️ Preview Data", expanded=False):
+            st.dataframe(df.head(20), use_container_width=True)
     
     if st.session_state.uploaded_data is None:
-        st.info("👈 Please upload a CSV file from your Athena query to begin analysis")
+        # Show helpful information when no data is uploaded
+        st.markdown("---")
+        
+        st.markdown("""
+        ### 🚀 How It Works
+        
+        1. **Upload** - Upload any CSV file from AWS Athena, Cost Explorer, or AWS service queries
+        2. **Auto-Detect** - The intelligent agent automatically identifies your AWS service
+        3. **Smart Questions** - Get contextual questions tailored to your specific data
+        4. **AI Analysis** - Ask questions and receive detailed insights powered by AWS Bedrock
+        5. **Visualizations** - Automatic charts and graphs for better understanding
+        
+        ### 📊 Supported AWS Services
+        
+        The agent works with **20+ AWS services** including:
+        - **Compute**: EC2, Lambda, ECS, EKS
+        - **Storage**: S3, EBS, EFS
+        - **Database**: RDS, DynamoDB, Redshift
+        - **Networking**: VPC, CloudFront, Route53, ELB
+        - **Cost**: Cost & Usage Reports, Cost Explorer
+        - **And many more...**
+        
+        ### 💡 What You Get
+        
+        - ✅ Automatic service detection
+        - ✅ Smart, contextual questions
+        - ✅ Cost optimization recommendations
+        - ✅ Performance insights
+        - ✅ Interactive visualizations
+        - ✅ Actionable recommendations
+        - ✅ AWS best practices
+        """)
+        
+        st.markdown("---")
         
         # Show example queries
         st.subheader("📝 Example SQL Queries")
-        col1, col2 = st.columns(2)
         
-        with col1:
-            st.markdown("**Architecture Inference Query**")
+        tab1, tab2, tab3 = st.tabs(["Architecture Analysis", "Tagging Analysis", "Cost Analysis"])
+        
+        with tab1:
             with open('athena_architecture_inference.sql', 'r') as f:
                 st.code(f.read(), language='sql')
         
-        with col2:
-            st.markdown("**Tagging Correlation Query**")
+        with tab2:
             with open('athena_tagging_correlation.sql', 'r') as f:
                 st.code(f.read(), language='sql')
+        
+        with tab3:
+            st.code("""
+-- Simple Cost Analysis Query
+SELECT 
+    line_item_product_code as service,
+    SUM(line_item_unblended_cost) as total_cost,
+    COUNT(DISTINCT line_item_resource_id) as resource_count
+FROM cost_and_usage_report
+WHERE line_item_usage_start_date >= DATE_ADD('day', -30, CURRENT_DATE)
+GROUP BY line_item_product_code
+ORDER BY total_cost DESC
+LIMIT 20;
+            """, language='sql')
         
         return
     
     # Data summary
     summary = st.session_state.data_summary
+    analysis_type = summary.get('aws_service', 'General Analysis')
     
-    # Display AWS Service detected
+    st.markdown("---")
+    
+    # Display AWS Service detected with prominent styling
     if 'aws_service' in summary:
-        st.info(f"🔍 **Detected AWS Service:** {summary['aws_service']}")
+        st.markdown(f"""
+        <div style="background-color: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 5px solid #1f77b4;">
+            <h3 style="margin: 0; color: #1f77b4;">🔍 Detected: {summary['aws_service']}</h3>
+            <p style="margin: 5px 0 0 0; color: #555;">
+                The intelligent agent has analyzed your data and identified the AWS service.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
     
+    # Metrics in a clean layout
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Rows", f"{summary['total_rows']:,}")
+        st.metric("📊 Total Rows", f"{summary['total_rows']:,}")
     with col2:
-        st.metric("Total Cost", f"${summary['total_cost']:,.2f}")
+        st.metric("💰 Total Cost", f"${summary['total_cost']:,.2f}" if summary['total_cost'] > 0 else "N/A")
     with col3:
-        st.metric("Columns", summary['total_columns'])
+        st.metric("📋 Columns", summary['total_columns'])
     with col4:
-        st.metric("Analysis Type", analysis_type)
+        st.metric("⏱️ Queries", st.session_state.query_count)
     
     # Show intelligent summary table
     agent = st.session_state.intelligent_agent
     if agent.data is not None:
         summary_table = agent.create_summary_table()
         if summary_table:
-            with st.expander("📊 Data Summary Table"):
+            with st.expander("📊 Detailed Summary Statistics", expanded=False):
                 summary_df = pd.DataFrame(list(summary_table.items()), columns=['Metric', 'Value'])
                 st.dataframe(summary_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     
-    # Suggested prompts
-    st.subheader("💡 Suggested Questions")
+    # Suggested prompts in a better layout
+    st.subheader("💡 Smart Questions for Your Data")
+    st.caption("Click any question below or ask your own")
+    
     suggested_prompts = generate_suggested_prompts(summary, analysis_type)
     
-    cols = st.columns(len(suggested_prompts))
-    for idx, (col, prompt) in enumerate(zip(cols, suggested_prompts)):
-        with col:
+    # Display in 2 columns for better readability
+    col1, col2 = st.columns(2)
+    
+    for idx, prompt in enumerate(suggested_prompts):
+        with col1 if idx % 2 == 0 else col2:
             if st.button(prompt, key=f"prompt_{idx}", use_container_width=True):
                 st.session_state.current_prompt = prompt
     
     st.markdown("---")
     
-    # Chat interface
-    st.subheader("💬 Chat with Agent")
+    # Chat interface with better styling
+    st.subheader("💬 Interactive Analysis")
+    st.caption("Ask questions about your data or click a suggested question above")
     
     # Display chat history
     for idx, message in enumerate(st.session_state.chat_history):
@@ -574,6 +621,28 @@ def main():
         chart2 = create_cost_visualization(st.session_state.uploaded_data, "pie")
         if chart2:
             st.plotly_chart(chart2, use_container_width=True, key="viz_pie_chart")
+    
+    # Session info at bottom
+    st.markdown("---")
+    with st.expander("ℹ️ Session Information", expanded=False):
+        session_duration = (datetime.now() - st.session_state.session_start).total_seconds()
+        
+        info_col1, info_col2, info_col3, info_col4 = st.columns(4)
+        
+        with info_col1:
+            st.metric("Session Duration", f"{int(session_duration // 60)}m {int(session_duration % 60)}s")
+        with info_col2:
+            st.metric("Queries Made", st.session_state.query_count)
+        with info_col3:
+            st.metric("Files Uploaded", st.session_state.file_upload_count)
+        with info_col4:
+            st.metric("Messages", len(st.session_state.chat_history))
+        
+        st.caption(f"Session ID: `{st.session_state.session_id}`")
+        
+        if st.button("📝 End & Log Session"):
+            log_session_end()
+            st.success("✅ Session logged successfully!")
 
 if __name__ == "__main__":
     main()
