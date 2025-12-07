@@ -144,10 +144,6 @@ def merge_files(files_info):
         for file_info in files_info[1:]:
             common_columns &= set(file_info['df'].columns)
         
-        if len(common_columns) == 0:
-            # No common columns - can't merge
-            return None, False
-        
         # Strategy 1: All files have same columns - simple concatenation
         all_same_columns = all(
             set(f['df'].columns) == first_columns 
@@ -157,17 +153,19 @@ def merge_files(files_info):
         if all_same_columns:
             # Simple vertical concatenation
             merged_df = pd.concat([f['df'] for f in files_info], ignore_index=True)
+            st.info(f"✅ Merged using: **Identical columns** (simple concatenation)")
             return merged_df, True
         
         # Strategy 2: Files have overlapping columns - merge on common columns
-        if len(common_columns) >= 3:  # Need at least 3 common columns
+        if len(common_columns) >= 2:  # Relaxed from 3 to 2
             # Use only common columns
             dfs_with_common = [f['df'][list(common_columns)] for f in files_info]
             merged_df = pd.concat(dfs_with_common, ignore_index=True)
+            st.info(f"✅ Merged using: **Common columns** ({len(common_columns)} columns: {', '.join(list(common_columns)[:5])})")
             return merged_df, True
         
         # Strategy 3: Try to join on key columns
-        key_columns = ['date', 'service', 'region', 'resource_id', 'instance_id', 'volume_id', 'bucket_name']
+        key_columns = ['date', 'service', 'region', 'resource_id', 'instance_id', 'volume_id', 'bucket_name', 'month']
         found_keys = [col for col in key_columns if col in common_columns]
         
         if found_keys:
@@ -181,13 +179,46 @@ def merge_files(files_info):
                     how='outer',
                     suffixes=('', f'_{file_info["name"][:10]}')
                 )
+            st.info(f"✅ Merged using: **Key-based join** (keys: {', '.join(found_keys)})")
             return merged_df, True
         
-        # Can't merge
+        # Strategy 4: Force merge with all columns (add source column)
+        if len(common_columns) >= 1:
+            # Add source file column to track origin
+            all_dfs = []
+            for file_info in files_info:
+                df_copy = file_info['df'].copy()
+                df_copy['_source_file'] = file_info['name']
+                all_dfs.append(df_copy)
+            
+            # Concatenate with all columns (fills NaN for missing columns)
+            merged_df = pd.concat(all_dfs, ignore_index=True, sort=False)
+            st.warning(f"⚠️ Merged using: **Force merge** (files have different structures, NaN values added for missing columns)")
+            st.caption(f"Common columns: {len(common_columns)}, Total columns: {len(merged_df.columns)}")
+            return merged_df, True
+        
+        # Strategy 5: No common columns - still try to merge with source tracking
+        if len(common_columns) == 0:
+            st.warning("⚠️ Files have NO common columns. Creating combined dataset with source tracking.")
+            all_dfs = []
+            for file_info in files_info:
+                df_copy = file_info['df'].copy()
+                df_copy['_source_file'] = file_info['name']
+                df_copy['_file_type'] = file_info['type']
+                all_dfs.append(df_copy)
+            
+            merged_df = pd.concat(all_dfs, ignore_index=True, sort=False)
+            st.info(f"✅ Created combined dataset with {len(merged_df)} rows and {len(merged_df.columns)} columns")
+            st.caption("Use '_source_file' column to filter by original file")
+            return merged_df, True
+        
+        # Should never reach here
         return None, False
         
     except Exception as e:
-        st.error(f"Error merging files: {str(e)}")
+        st.error(f"❌ Error merging files: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
         return None, False
 
 def analyze_uploaded_data(df):
@@ -575,13 +606,42 @@ def main():
         # Display file detection results
         with st.expander("📁 Uploaded Files Detection", expanded=True):
             for file_info in all_files_info:
-                col_a, col_b, col_c = st.columns([2, 2, 1])
+                col_a, col_b, col_c, col_d = st.columns([2, 2, 1, 1])
                 with col_a:
                     st.write(f"**{file_info['name']}**")
                 with col_b:
-                    st.write(f"🔍 Detected: **{file_info['type']}**")
+                    st.write(f"🔍 {file_info['type']}")
                 with col_c:
                     st.write(f"{file_info['rows']:,} rows")
+                with col_d:
+                    st.write(f"{file_info['columns']} cols")
+            
+            # Show merge compatibility info
+            if len(all_files_info) > 1:
+                st.divider()
+                st.caption("**Merge Compatibility Analysis:**")
+                
+                # Check common columns
+                first_cols = set(all_files_info[0]['df'].columns)
+                common_cols = first_cols.copy()
+                for f in all_files_info[1:]:
+                    common_cols &= set(f['df'].columns)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Common Columns", len(common_cols))
+                with col2:
+                    all_same = all(set(f['df'].columns) == first_cols for f in all_files_info)
+                    if all_same:
+                        st.success("✅ Identical structure")
+                    elif len(common_cols) >= 2:
+                        st.info(f"⚠️ Partial overlap")
+                    else:
+                        st.warning("⚠️ Different structures")
+                
+                if len(common_cols) > 0:
+                    with st.expander("View common columns"):
+                        st.write(", ".join(sorted(common_cols)))
         
         # Let user select which file to analyze (or merge)
         if len(uploaded_files) == 1:
@@ -604,16 +664,26 @@ def main():
             
             if selected_option.startswith("🔗 Merge"):
                 # Attempt to merge files
-                merged_df, merge_success = merge_files(all_files_info)
+                with st.spinner("Merging files..."):
+                    merged_df, merge_success = merge_files(all_files_info)
+                
                 if merge_success:
                     df = merged_df
                     # Save merged file
                     with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
                         df.to_csv(tmp_file.name, index=False)
                         tmp_file_path = tmp_file.name
-                    st.success(f"✅ Merged {len(all_files_info)} files into {len(df):,} rows")
+                    
+                    # Show merge statistics
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Total Rows", f"{len(df):,}")
+                    with col2:
+                        st.metric("Total Columns", len(df.columns))
+                    with col3:
+                        st.metric("Files Merged", len(all_files_info))
                 else:
-                    st.error("❌ Files are not compatible for merging. Please select a single file.")
+                    st.error("❌ Merge failed. This should not happen with the new merge logic. Please report this issue.")
                     return
             else:
                 # Single file selected
