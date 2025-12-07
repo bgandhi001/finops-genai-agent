@@ -58,19 +58,40 @@ We've built a full-featured Streamlit application with:
 **Quick Start:**
 
 ```bash
-# Create and activate virtual environment (recommended)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Option 1: Use startup script (easiest)
+./start.sh              # macOS/Linux
+start.bat               # Windows
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Setup AWS infrastructure
-python setup_aws.py
-
-# Run the app
+# Option 2: Manual start
+source venv/bin/activate
 streamlit run streamlit_app.py
 ```
+
+**First Time Setup:**
+
+```bash
+# 1. Create virtual environment
+python3 -m venv venv
+
+# 2. Activate it
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate     # Windows
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Configure AWS credentials
+cp .env.example .env
+# Edit .env with your AWS credentials
+
+# 5. Setup AWS infrastructure
+python setup_aws.py
+
+# 6. Run the app
+streamlit run streamlit_app.py
+```
+
+**See [RUN_LOCALLY.md](RUN_LOCALLY.md) for detailed instructions.**
 
 **Documentation:**
 - [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
