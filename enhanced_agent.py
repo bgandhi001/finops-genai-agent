@@ -151,6 +151,235 @@ SQL Query:"""
         return commands
 
     
+    def generate_example_sql_queries(self, user_context=None):
+        """
+        Generate example SQL queries based on data structure and user context
+        """
+        examples = []
+        
+        # Get column information
+        cost_cols = self.column_types.get('costs', [])
+        metric_cols = self.column_types.get('metrics', [])
+        dimension_cols = self.column_types.get('dimensions', [])
+        date_cols = self.column_types.get('dates', [])
+        
+        # Basic queries
+        examples.append({
+            'category': 'Basic Analysis',
+            'description': 'View sample data',
+            'sql': f'SELECT * FROM {self.table_name} LIMIT 10',
+            'use_case': 'Quick preview of your data'
+        })
+        
+        examples.append({
+            'category': 'Basic Analysis',
+            'description': 'Count total rows',
+            'sql': f'SELECT COUNT(*) as total_rows FROM {self.table_name}',
+            'use_case': 'Understand data volume'
+        })
+        
+        # Cost analysis queries
+        if cost_cols:
+            cost_col = cost_cols[0]
+            
+            examples.append({
+                'category': 'Cost Analysis',
+                'description': 'Total cost summary',
+                'sql': f'''SELECT 
+    SUM({cost_col}) as total_cost,
+    AVG({cost_col}) as avg_cost,
+    MAX({cost_col}) as max_cost,
+    MIN({cost_col}) as min_cost
+FROM {self.table_name}''',
+                'use_case': 'Get overall cost statistics'
+            })
+            
+            if dimension_cols:
+                dim_col = dimension_cols[0]
+                examples.append({
+                    'category': 'Cost Analysis',
+                    'description': f'Top 10 costs by {dim_col}',
+                    'sql': f'''SELECT 
+    {dim_col},
+    SUM({cost_col}) as total_cost,
+    COUNT(*) as count
+FROM {self.table_name}
+GROUP BY {dim_col}
+ORDER BY total_cost DESC
+LIMIT 10''',
+                    'use_case': f'Identify highest cost {dim_col}s'
+                })
+                
+                if len(dimension_cols) > 1:
+                    dim_col2 = dimension_cols[1]
+                    examples.append({
+                        'category': 'Cost Analysis',
+                        'description': f'Cost breakdown by {dim_col} and {dim_col2}',
+                        'sql': f'''SELECT 
+    {dim_col},
+    {dim_col2},
+    SUM({cost_col}) as total_cost
+FROM {self.table_name}
+GROUP BY {dim_col}, {dim_col2}
+ORDER BY total_cost DESC
+LIMIT 20''',
+                        'use_case': f'Multi-dimensional cost analysis'
+                    })
+        
+        # Date-based queries
+        if date_cols and cost_cols:
+            date_col = date_cols[0]
+            cost_col = cost_cols[0]
+            
+            examples.append({
+                'category': 'Trend Analysis',
+                'description': 'Daily cost trends',
+                'sql': f'''SELECT 
+    {date_col},
+    SUM({cost_col}) as daily_cost,
+    COUNT(*) as records
+FROM {self.table_name}
+GROUP BY {date_col}
+ORDER BY {date_col}''',
+                'use_case': 'Track cost changes over time'
+            })
+            
+            if dimension_cols:
+                dim_col = dimension_cols[0]
+                examples.append({
+                    'category': 'Trend Analysis',
+                    'description': f'Cost trends by {dim_col}',
+                    'sql': f'''SELECT 
+    {date_col},
+    {dim_col},
+    SUM({cost_col}) as cost
+FROM {self.table_name}
+GROUP BY {date_col}, {dim_col}
+ORDER BY {date_col}, cost DESC''',
+                    'use_case': f'Track {dim_col} costs over time'
+                })
+        
+        # Optimization queries
+        if 'state' in [col.lower() for col in self.data.columns]:
+            examples.append({
+                'category': 'Optimization',
+                'description': 'Find unattached/unused resources',
+                'sql': f'''SELECT 
+    *
+FROM {self.table_name}
+WHERE LOWER(state) IN ('available', 'unused', 'stopped')''',
+                'use_case': 'Identify resources that can be deleted'
+            })
+        
+        if cost_cols and dimension_cols:
+            cost_col = cost_cols[0]
+            dim_col = dimension_cols[0]
+            examples.append({
+                'category': 'Optimization',
+                'description': 'Resources with zero or minimal cost',
+                'sql': f'''SELECT 
+    {dim_col},
+    {cost_col}
+FROM {self.table_name}
+WHERE {cost_col} < 1
+ORDER BY {cost_col}''',
+                'use_case': 'Find low-value resources'
+            })
+        
+        # Aggregation queries
+        if metric_cols and dimension_cols:
+            metric_col = metric_cols[0]
+            dim_col = dimension_cols[0]
+            
+            examples.append({
+                'category': 'Metrics Analysis',
+                'description': f'Average {metric_col} by {dim_col}',
+                'sql': f'''SELECT 
+    {dim_col},
+    AVG({metric_col}) as avg_metric,
+    MAX({metric_col}) as max_metric,
+    MIN({metric_col}) as min_metric
+FROM {self.table_name}
+GROUP BY {dim_col}
+ORDER BY avg_metric DESC''',
+                'use_case': f'Analyze {metric_col} distribution'
+            })
+        
+        # Filtering queries
+        if dimension_cols:
+            dim_col = dimension_cols[0]
+            examples.append({
+                'category': 'Filtering',
+                'description': f'Filter by specific {dim_col}',
+                'sql': f'''SELECT 
+    *
+FROM {self.table_name}
+WHERE {dim_col} = 'YOUR_VALUE_HERE'
+LIMIT 100''',
+                'use_case': f'Focus on specific {dim_col}'
+            })
+        
+        # Advanced queries
+        if cost_cols and dimension_cols:
+            cost_col = cost_cols[0]
+            dim_col = dimension_cols[0]
+            
+            examples.append({
+                'category': 'Advanced',
+                'description': 'Cost distribution percentiles',
+                'sql': f'''SELECT 
+    {dim_col},
+    SUM({cost_col}) as total_cost,
+    ROUND(100.0 * SUM({cost_col}) / SUM(SUM({cost_col})) OVER (), 2) as cost_percentage
+FROM {self.table_name}
+GROUP BY {dim_col}
+ORDER BY total_cost DESC''',
+                'use_case': 'Understand cost distribution'
+            })
+            
+            examples.append({
+                'category': 'Advanced',
+                'description': 'Resources above average cost',
+                'sql': f'''SELECT 
+    *
+FROM {self.table_name}
+WHERE {cost_col} > (SELECT AVG({cost_col}) FROM {self.table_name})
+ORDER BY {cost_col} DESC''',
+                'use_case': 'Find expensive outliers'
+            })
+        
+        # Service-specific queries based on detected service
+        if self.service:
+            if 'EC2' in self.service or 'EBS' in self.service:
+                examples.append({
+                    'category': 'EC2/EBS Specific',
+                    'description': 'Group by volume/instance type',
+                    'sql': f'''SELECT 
+    volume_type,
+    COUNT(*) as count,
+    SUM(size_gb) as total_size_gb
+FROM {self.table_name}
+GROUP BY volume_type
+ORDER BY count DESC''',
+                    'use_case': 'Analyze volume type distribution'
+                })
+            
+            if 'S3' in self.service:
+                examples.append({
+                    'category': 'S3 Specific',
+                    'description': 'Buckets by storage class',
+                    'sql': f'''SELECT 
+    storage_class,
+    COUNT(*) as bucket_count,
+    SUM(size_gb) as total_size_gb
+FROM {self.table_name}
+GROUP BY storage_class
+ORDER BY total_size_gb DESC''',
+                    'use_case': 'Analyze storage class usage'
+                })
+        
+        return examples
+    
     def get_table_stats(self):
         """
         Get table statistics using SQL (fast, accurate)

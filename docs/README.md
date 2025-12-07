@@ -16,7 +16,8 @@
 
 - **[README_STREAMLIT.md](README_STREAMLIT.md)** - Complete application documentation
 - **[INTELLIGENT_AGENT.md](INTELLIGENT_AGENT.md)** - Smart agent capabilities
-- **[MULTI_FILE_UPLOAD.md](MULTI_FILE_UPLOAD.md)** - Multi-file upload & intelligent detection (NEW!)
+- **[MULTI_FILE_UPLOAD.md](MULTI_FILE_UPLOAD.md)** - Multi-file upload & intelligent detection
+- **[SQL_QUERY_EXAMPLES.md](SQL_QUERY_EXAMPLES.md)** - Auto-generated SQL examples (NEW!)
 - **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - New features (DuckDB, Text-to-SQL, CLI commands)
 - **[AGENT_COMPARISON.md](AGENT_COMPARISON.md)** - Comparison of different agents
 - **[UI_GUIDE.md](UI_GUIDE.md)** - User interface guide
@@ -75,6 +76,7 @@ docs/
 │   ├── README_STREAMLIT.md
 │   ├── INTELLIGENT_AGENT.md
 │   ├── MULTI_FILE_UPLOAD.md
+│   ├── SQL_QUERY_EXAMPLES.md
 │   ├── ENHANCEMENTS.md
 │   ├── UI_GUIDE.md
 │   └── SAMPLE_DATA_GUIDE.md

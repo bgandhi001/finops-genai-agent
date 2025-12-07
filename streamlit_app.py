@@ -780,29 +780,119 @@ LIMIT 20;
     # Chat interface with better styling
     st.subheader("💬 Interactive Analysis")
     
-    # Add SQL query option for enhanced agent
+    # Add SQL examples and query execution for enhanced agent
     agent = st.session_state.intelligent_agent
-    if isinstance(agent, EnhancedAWSAgent):
+    if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
+        
+        # Example SQL Queries Section
+        with st.expander("📚 Example SQL Queries - Learn by Example", expanded=False):
+            st.caption("Pre-built SQL queries tailored to your data. Click to copy and modify!")
+            
+            # Generate examples based on uploaded data
+            examples = agent.generate_example_sql_queries()
+            
+            # Group by category
+            categories = {}
+            for example in examples:
+                cat = example['category']
+                if cat not in categories:
+                    categories[cat] = []
+                categories[cat].append(example)
+            
+            # Display by category with tabs
+            if categories:
+                tabs = st.tabs(list(categories.keys()))
+                
+                for tab, (category, queries) in zip(tabs, categories.items()):
+                    with tab:
+                        for i, query in enumerate(queries):
+                            col1, col2 = st.columns([3, 1])
+                            
+                            with col1:
+                                st.markdown(f"**{query['description']}**")
+                                st.caption(f"💡 {query['use_case']}")
+                            
+                            with col2:
+                                if st.button("📋 Copy", key=f"copy_{category}_{i}"):
+                                    st.session_state.sql_to_execute = query['sql']
+                                    st.success("Copied!")
+                            
+                            # Show SQL in code block
+                            st.code(query['sql'], language='sql')
+                            st.divider()
+        
+        # Execute SQL Query Section
         with st.expander("🔧 Advanced: Execute SQL Query", expanded=False):
             st.caption("Write custom SQL queries for precise analysis")
+            
+            # Use copied SQL if available
+            default_sql = st.session_state.get('sql_to_execute', '')
+            if default_sql:
+                del st.session_state.sql_to_execute
+            
             sql_query = st.text_area(
                 "SQL Query",
+                value=default_sql,
                 placeholder="SELECT service, SUM(cost) as total_cost FROM aws_data GROUP BY service ORDER BY total_cost DESC LIMIT 10",
-                height=100
+                height=150,
+                help="Write any SELECT query. Dangerous operations (DROP, DELETE, etc.) are blocked for safety."
             )
-            if st.button("Execute SQL"):
-                if sql_query:
+            
+            col1, col2, col3 = st.columns([1, 1, 2])
+            with col1:
+                execute_btn = st.button("▶️ Execute SQL", type="primary")
+            with col2:
+                if st.button("🔄 Clear"):
+                    st.rerun()
+            with col3:
+                st.caption("💡 Tip: Use example queries above as templates")
+            
+            if execute_btn and sql_query:
+                with st.spinner("Executing query..."):
                     result, error = agent.execute_sql(sql_query)
+                    
                     if error:
-                        st.error(f"SQL Error: {error}")
+                        st.error(f"❌ SQL Error: {error}")
+                        st.info("💡 Try using one of the example queries above or check your SQL syntax")
                     else:
-                        st.success("Query executed successfully!")
+                        st.success(f"✅ Query executed successfully! ({len(result)} rows returned)")
+                        
+                        # Display results
                         st.dataframe(result, use_container_width=True)
                         
+                        # Download button
+                        csv = result.to_csv(index=False)
+                        st.download_button(
+                            label="📥 Download Results as CSV",
+                            data=csv,
+                            file_name="query_results.csv",
+                            mime="text/csv"
+                        )
+                        
                         # Try to visualize if possible
-                        if len(result.columns) >= 2:
-                            fig = px.bar(result, x=result.columns[0], y=result.columns[1])
-                            st.plotly_chart(fig, use_container_width=True)
+                        if len(result.columns) >= 2 and len(result) > 0:
+                            st.subheader("📊 Visualization")
+                            
+                            # Let user choose chart type
+                            chart_type = st.selectbox(
+                                "Chart Type",
+                                ["Bar Chart", "Line Chart", "Pie Chart", "Scatter Plot"],
+                                key="sql_chart_type"
+                            )
+                            
+                            try:
+                                if chart_type == "Bar Chart":
+                                    fig = px.bar(result, x=result.columns[0], y=result.columns[1])
+                                elif chart_type == "Line Chart":
+                                    fig = px.line(result, x=result.columns[0], y=result.columns[1])
+                                elif chart_type == "Pie Chart":
+                                    fig = px.pie(result, names=result.columns[0], values=result.columns[1])
+                                else:  # Scatter Plot
+                                    fig = px.scatter(result, x=result.columns[0], y=result.columns[1])
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                            except Exception as e:
+                                st.info(f"Could not create visualization: {str(e)}")
     
     st.caption("Ask questions about your data or click a suggested question above")
     
