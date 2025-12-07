@@ -1,8 +1,8 @@
 # Text-to-SQL Implementation
 
-## ✅ Gemini's Suggestions - Fully Implemented!
+## ✅ Enhanced Architecture - Fully Implemented!
 
-The EnhancedAWSAgent implements **all** of Gemini's recommendations for better accuracy and scalability.
+The EnhancedAWSAgent implements an advanced architecture for better accuracy and scalability.
 
 ## Architecture: Code Interpreter Pattern
 
@@ -421,7 +421,7 @@ with st.expander("🔧 Advanced: Execute SQL Query"):
 
 ## Conclusion
 
-The EnhancedAWSAgent **fully implements** Gemini's recommendations:
+The EnhancedAWSAgent **fully implements** advanced architectural patterns:
 
 1. ✅ **Text-to-SQL**: User Query → LLM generates SQL → Execute → Summarize
 2. ✅ **SQL Profiling**: All statistics calculated via SQL (not Pandas)

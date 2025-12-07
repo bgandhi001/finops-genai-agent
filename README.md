@@ -48,7 +48,7 @@ This repository contains the blueprints for two "Cool GenAI Projects" for a FinO
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Text-to-SQL Flow (Gemini Architecture)
+### Text-to-SQL Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
