@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from io import StringIO
 import os
 from pathlib import Path
+from intelligent_agent import IntelligentAWSAgent
 
 # Load environment variables from .env file
 def load_env_file():
@@ -53,29 +54,46 @@ def init_session_state():
         st.session_state.query_count = 0
     if 'file_upload_count' not in st.session_state:
         st.session_state.file_upload_count = 0
+    if 'intelligent_agent' not in st.session_state:
+        st.session_state.intelligent_agent = IntelligentAWSAgent()
 
 def analyze_uploaded_data(df):
-    """Analyze uploaded data and generate summary"""
+    """Analyze uploaded data using intelligent agent"""
+    # Use intelligent agent for analysis
+    agent = st.session_state.intelligent_agent
+    analysis = agent.analyze_data(df)
+    
+    # Create summary compatible with existing code
     summary = {
-        'total_rows': len(df),
-        'total_columns': len(df.columns),
-        'columns': df.columns.tolist(),
-        'numeric_columns': df.select_dtypes(include=['number']).columns.tolist(),
-        'total_cost': df['total_cost'].sum() if 'total_cost' in df.columns else 0,
-        'date_range': None
+        'total_rows': analysis['profile']['total_rows'],
+        'total_columns': analysis['profile']['total_columns'],
+        'columns': analysis['profile']['columns'],
+        'numeric_columns': analysis['profile']['numeric_columns'],
+        'total_cost': 0,
+        'date_range': None,
+        'aws_service': analysis['service'],
+        'column_types': analysis['column_types'],
+        'data_profile': analysis['profile']
     }
     
-    # Detect cost columns
-    cost_cols = [col for col in df.columns if 'cost' in col.lower() or 'spend' in col.lower()]
-    if cost_cols:
-        summary['total_cost'] = df[cost_cols[0]].sum()
+    # Calculate total cost if cost columns exist
+    if analysis['column_types']['costs']:
+        cost_col = analysis['column_types']['costs'][0]
+        summary['total_cost'] = df[cost_col].sum()
     
     return summary
 
 def generate_suggested_prompts(data_summary, analysis_type):
-    """Generate contextual prompts based on uploaded data"""
-    prompts = []
+    """Generate contextual prompts using intelligent agent"""
+    # Use intelligent agent to generate smart questions
+    agent = st.session_state.intelligent_agent
     
+    if agent.data is not None:
+        smart_questions = agent.generate_smart_questions()
+        if smart_questions:
+            return smart_questions
+    
+    # Fallback to type-based prompts
     if analysis_type == "Architecture Inference":
         prompts = [
             "🔍 Analyze cross-AZ data transfer patterns and suggest optimizations",
@@ -103,17 +121,22 @@ def generate_suggested_prompts(data_summary, analysis_type):
     return prompts
 
 def call_bedrock_llm(prompt, context_data, chat_history):
-    """Call AWS Bedrock with Claude for analysis"""
+    """Call AWS Bedrock with Claude for analysis using intelligent agent"""
     try:
         bedrock = get_bedrock_client()
         
-        # Build conversation context
-        conversation_context = "\n".join([
-            f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
-            for msg in chat_history[-5:]  # Last 5 messages for context
-        ])
-        
-        full_prompt = f"""You are an expert FinOps Architect Assistant with deep knowledge of AWS cost optimization.
+        # Use intelligent agent to generate enhanced prompt
+        agent = st.session_state.intelligent_agent
+        if agent.data is not None:
+            enhanced_prompt, enhanced_context = agent.generate_analysis_prompt(prompt)
+        else:
+            # Fallback to basic prompt
+            conversation_context = "\n".join([
+                f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+                for msg in chat_history[-5:]
+            ])
+            
+            enhanced_prompt = f"""You are an expert FinOps Architect Assistant with deep knowledge of AWS cost optimization.
 
 Context Data:
 {json.dumps(context_data, indent=2)}
@@ -137,7 +160,7 @@ Format your response in markdown with clear sections."""
             "messages": [
                 {
                     "role": "user",
-                    "content": full_prompt
+                    "content": enhanced_prompt
                 }
             ],
             "temperature": 0.7
@@ -421,6 +444,11 @@ def main():
     
     # Data summary
     summary = st.session_state.data_summary
+    
+    # Display AWS Service detected
+    if 'aws_service' in summary:
+        st.info(f"🔍 **Detected AWS Service:** {summary['aws_service']}")
+    
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -431,6 +459,15 @@ def main():
         st.metric("Columns", summary['total_columns'])
     with col4:
         st.metric("Analysis Type", analysis_type)
+    
+    # Show intelligent summary table
+    agent = st.session_state.intelligent_agent
+    if agent.data is not None:
+        summary_table = agent.create_summary_table()
+        if summary_table:
+            with st.expander("📊 Data Summary Table"):
+                summary_df = pd.DataFrame(list(summary_table.items()), columns=['Metric', 'Value'])
+                st.dataframe(summary_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     
