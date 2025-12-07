@@ -7,6 +7,22 @@ Creates necessary AWS resources: DynamoDB table for learning storage
 import boto3
 import sys
 import os
+from pathlib import Path
+
+# Load environment variables from .env file
+def load_env_file():
+    """Load environment variables from .env file if it exists"""
+    env_file = Path('.env')
+    if env_file.exists():
+        print("📄 Loading credentials from .env file...")
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+        return True
+    return False
 
 def create_dynamodb_table(table_name='finops-agent-interactions', region='us-east-1'):
     """Create DynamoDB table for storing user interactions"""
@@ -119,6 +135,10 @@ def setup_iam_policy():
 def main():
     print("🚀 FinOps GenAI Agent - AWS Setup")
     print("=" * 60)
+    print()
+    
+    # Load .env file
+    env_loaded = load_env_file()
     
     # Get configuration
     region = os.getenv('AWS_REGION', 'us-east-1')
@@ -130,7 +150,7 @@ def main():
     
     # Check AWS credentials
     try:
-        sts = boto3.client('sts')
+        sts = boto3.client('sts', region_name=region)
         identity = sts.get_caller_identity()
         print(f"✅ AWS Credentials configured")
         print(f"   Account: {identity['Account']}")
@@ -138,7 +158,25 @@ def main():
         print()
     except Exception as e:
         print(f"❌ AWS credentials not configured: {str(e)}")
-        print("   Please configure AWS credentials using 'aws configure'")
+        print()
+        print("📝 To fix this, you have 3 options:")
+        print()
+        print("Option 1: Edit .env file (Recommended)")
+        print("   1. Open .env file in a text editor")
+        print("   2. Replace 'your_access_key_here' with your actual AWS Access Key")
+        print("   3. Replace 'your_secret_key_here' with your actual AWS Secret Key")
+        print("   4. Run this script again")
+        print()
+        print("Option 2: Set environment variables")
+        print("   export AWS_ACCESS_KEY_ID=your_key")
+        print("   export AWS_SECRET_ACCESS_KEY=your_secret")
+        print()
+        print("Option 3: Install and configure AWS CLI")
+        print("   brew install awscli  # macOS")
+        print("   aws configure")
+        print()
+        print("📚 See AWS_CLI_SETUP.md for detailed instructions")
+        print()
         sys.exit(1)
     
     # Create DynamoDB table
