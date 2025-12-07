@@ -31,16 +31,40 @@ pip install -r requirements.txt
 
 **Note**: Always activate the virtual environment before running the app!
 
-## Step 2: Configure AWS (1 min)
+## Step 2: Install & Configure AWS CLI (2 min)
+
+### Install AWS CLI (if not already installed)
 
 ```bash
-# Option A: Use AWS CLI
+# macOS (using Homebrew)
+brew install awscli
+
+# Linux
+sudo apt-get install awscli  # Ubuntu/Debian
+# or
+pip install awscli
+
+# Windows
+# Download from: https://awscli.amazonaws.com/AWSCLIV2.msi
+```
+
+**Verify installation:**
+```bash
+aws --version
+```
+
+### Configure AWS Credentials
+
+```bash
+# Option A: Use AWS CLI (recommended)
 aws configure
 
 # Option B: Use environment file
 cp .env.example .env
 # Edit .env with your credentials
 ```
+
+**Need help?** See [AWS_CLI_SETUP.md](AWS_CLI_SETUP.md) for detailed instructions.
 
 ## Step 3: Setup Infrastructure (1 min)
 
