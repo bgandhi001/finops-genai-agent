@@ -61,6 +61,135 @@ def init_session_state():
     if 'use_enhanced_agent' not in st.session_state:
         st.session_state.use_enhanced_agent = True
 
+def detect_file_type(df, filename):
+    """Intelligently detect the type of AWS data file"""
+    columns = [col.lower() for col in df.columns]
+    filename_lower = filename.lower()
+    
+    # Cost & Usage Report (CUR)
+    if any(col in columns for col in ['line_item_usage_account_id', 'line_item_product_code', 'line_item_unblended_cost']):
+        return "AWS Cost & Usage Report (CUR)"
+    
+    # Trusted Advisor
+    if any(col in columns for col in ['check_name', 'check_id', 'status', 'resource_id']) or 'trusted' in filename_lower:
+        return "AWS Trusted Advisor Report"
+    
+    # Cost Optimization Hub
+    if any(col in columns for col in ['recommendation_id', 'estimated_monthly_savings', 'implementation_effort']) or 'optimization' in filename_lower:
+        return "AWS Cost Optimization Hub Export"
+    
+    # Compute Optimizer
+    if any(col in columns for col in ['instance_arn', 'finding', 'current_instance_type', 'recommended_instance_type']):
+        return "AWS Compute Optimizer Report"
+    
+    # EBS Volumes
+    if any(col in columns for col in ['volume_id', 'volume_type', 'state']) and 'volume' in filename_lower:
+        return "EBS Volumes Data"
+    
+    # S3 Buckets
+    if any(col in columns for col in ['bucket_name', 'storage_class']) or 'bucket' in filename_lower:
+        return "S3 Buckets Data"
+    
+    # EC2 Instances
+    if any(col in columns for col in ['instance_id', 'instance_type', 'instance_state']):
+        return "EC2 Instances Data"
+    
+    # RDS Instances
+    if any(col in columns for col in ['db_instance_identifier', 'db_instance_class', 'engine']):
+        return "RDS Instances Data"
+    
+    # Lambda Functions
+    if any(col in columns for col in ['function_name', 'runtime', 'memory_size']):
+        return "Lambda Functions Data"
+    
+    # CloudWatch Metrics
+    if any(col in columns for col in ['metric_name', 'namespace', 'timestamp']):
+        return "CloudWatch Metrics Data"
+    
+    # Cost Explorer Export
+    if any(col in columns for col in ['time_period', 'service', 'amount']):
+        return "Cost Explorer Export"
+    
+    # Savings Plans
+    if any(col in columns for col in ['savings_plan_arn', 'commitment', 'utilization']):
+        return "Savings Plans Data"
+    
+    # Reserved Instances
+    if any(col in columns for col in ['reservation_id', 'instance_count', 'offering_type']):
+        return "Reserved Instances Data"
+    
+    # Generic AWS service data
+    if 'service' in columns or 'aws' in filename_lower:
+        return "AWS Service Data"
+    
+    # Monthly trends
+    if 'month' in columns and 'cost' in columns:
+        return "Monthly Cost Trends"
+    
+    # Generic cost data
+    if any(col in columns for col in ['cost', 'charge', 'amount', 'price']):
+        return "Cost Analysis Data"
+    
+    return "Unknown AWS Data"
+
+def merge_files(files_info):
+    """Attempt to merge multiple files intelligently"""
+    try:
+        # Check if all files have compatible structures
+        first_file = files_info[0]
+        first_columns = set(first_file['df'].columns)
+        
+        # Check for common columns
+        common_columns = first_columns.copy()
+        for file_info in files_info[1:]:
+            common_columns &= set(file_info['df'].columns)
+        
+        if len(common_columns) == 0:
+            # No common columns - can't merge
+            return None, False
+        
+        # Strategy 1: All files have same columns - simple concatenation
+        all_same_columns = all(
+            set(f['df'].columns) == first_columns 
+            for f in files_info
+        )
+        
+        if all_same_columns:
+            # Simple vertical concatenation
+            merged_df = pd.concat([f['df'] for f in files_info], ignore_index=True)
+            return merged_df, True
+        
+        # Strategy 2: Files have overlapping columns - merge on common columns
+        if len(common_columns) >= 3:  # Need at least 3 common columns
+            # Use only common columns
+            dfs_with_common = [f['df'][list(common_columns)] for f in files_info]
+            merged_df = pd.concat(dfs_with_common, ignore_index=True)
+            return merged_df, True
+        
+        # Strategy 3: Try to join on key columns
+        key_columns = ['date', 'service', 'region', 'resource_id', 'instance_id', 'volume_id', 'bucket_name']
+        found_keys = [col for col in key_columns if col in common_columns]
+        
+        if found_keys:
+            # Join on found keys
+            merged_df = files_info[0]['df']
+            for file_info in files_info[1:]:
+                merged_df = pd.merge(
+                    merged_df, 
+                    file_info['df'], 
+                    on=found_keys, 
+                    how='outer',
+                    suffixes=('', f'_{file_info["name"][:10]}')
+                )
+            return merged_df, True
+        
+        # Can't merge
+        return None, False
+        
+    except Exception as e:
+        st.error(f"Error merging files: {str(e)}")
+        return None, False
+
 def analyze_uploaded_data(df):
     """Analyze uploaded data using intelligent agent"""
     # Use intelligent agent for analysis
@@ -395,25 +524,103 @@ def main():
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        uploaded_file = st.file_uploader(
-            "Upload CSV file from Athena query or any AWS service SQL output",
+        uploaded_files = st.file_uploader(
+            "Upload CSV file(s) - CUR, Trusted Advisor, Cost Optimization Hub, or any AWS data",
             type=['csv'],
-            help="Supports EC2, S3, RDS, Lambda, DynamoDB, Cost & Usage Reports, and 20+ AWS services"
+            accept_multiple_files=True,
+            help="Upload multiple files: CUR exports, Trusted Advisor reports, Cost Optimization Hub data, script outputs, etc. Agent will auto-detect and analyze."
         )
     
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        if uploaded_file:
-            st.success("✅ File loaded")
+        if uploaded_files:
+            st.success(f"✅ {len(uploaded_files)} file(s) loaded")
         else:
             st.info("👆 Upload to start")
     
-    if uploaded_file:
-        # Save uploaded file temporarily for DuckDB
+    if uploaded_files:
+        # Initialize multi-file storage
+        if 'multi_file_data' not in st.session_state:
+            st.session_state.multi_file_data = {}
+        
+        # Process multiple files
         import tempfile
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            tmp_file_path = tmp_file.name
+        all_files_info = []
+        
+        for uploaded_file in uploaded_files:
+            # Save uploaded file temporarily for DuckDB
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
+                tmp_file.write(uploaded_file.getvalue())
+                tmp_file_path = tmp_file.name
+            
+            # Read file for detection
+            df = pd.read_csv(tmp_file_path)
+            
+            # Detect file type using intelligent detection
+            file_type = detect_file_type(df, uploaded_file.name)
+            
+            # Store file info
+            file_info = {
+                'name': uploaded_file.name,
+                'type': file_type,
+                'path': tmp_file_path,
+                'size': uploaded_file.size,
+                'rows': len(df),
+                'columns': len(df.columns),
+                'df': df
+            }
+            all_files_info.append(file_info)
+            st.session_state.multi_file_data[uploaded_file.name] = file_info
+        
+        # Display file detection results
+        with st.expander("📁 Uploaded Files Detection", expanded=True):
+            for file_info in all_files_info:
+                col_a, col_b, col_c = st.columns([2, 2, 1])
+                with col_a:
+                    st.write(f"**{file_info['name']}**")
+                with col_b:
+                    st.write(f"🔍 Detected: **{file_info['type']}**")
+                with col_c:
+                    st.write(f"{file_info['rows']:,} rows")
+        
+        # Let user select which file to analyze (or merge)
+        if len(uploaded_files) == 1:
+            # Single file - use directly
+            selected_file = all_files_info[0]
+            df = selected_file['df']
+            tmp_file_path = selected_file['path']
+        else:
+            # Multiple files - let user choose or merge
+            st.markdown("### 📊 Analysis Options")
+            
+            file_options = [f"{f['name']} ({f['type']})" for f in all_files_info]
+            file_options.insert(0, "🔗 Merge all files (if compatible)")
+            
+            selected_option = st.selectbox(
+                "Choose analysis approach:",
+                file_options,
+                help="Select a single file to analyze, or merge compatible files"
+            )
+            
+            if selected_option.startswith("🔗 Merge"):
+                # Attempt to merge files
+                merged_df, merge_success = merge_files(all_files_info)
+                if merge_success:
+                    df = merged_df
+                    # Save merged file
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
+                        df.to_csv(tmp_file.name, index=False)
+                        tmp_file_path = tmp_file.name
+                    st.success(f"✅ Merged {len(all_files_info)} files into {len(df):,} rows")
+                else:
+                    st.error("❌ Files are not compatible for merging. Please select a single file.")
+                    return
+            else:
+                # Single file selected
+                selected_idx = file_options.index(selected_option) - 1
+                selected_file = all_files_info[selected_idx]
+                df = selected_file['df']
+                tmp_file_path = selected_file['path']
         
         # Use enhanced agent to load data (handles large files efficiently)
         agent = st.session_state.intelligent_agent
@@ -426,7 +633,6 @@ def main():
                 return
         else:
             # Fallback to pandas for original agent
-            df = pd.read_csv(uploaded_file)
             agent.analyze_data(df)
         
         st.session_state.uploaded_data = df
@@ -435,14 +641,15 @@ def main():
         # Get analysis type from intelligent agent
         analysis_type = st.session_state.data_summary.get('aws_service', 'General Analysis')
         
-        # Log file upload
-        log_file_upload({
-            'name': uploaded_file.name,
-            'size': uploaded_file.size,
-            'rows': len(df),
-            'columns': len(df.columns),
-            'analysis_type': analysis_type
-        })
+        # Log file upload(s)
+        for file_info in all_files_info:
+            log_file_upload({
+                'name': file_info['name'],
+                'size': file_info['size'],
+                'rows': file_info['rows'],
+                'columns': file_info['columns'],
+                'analysis_type': file_info['type']
+            })
         
         # Data preview in expander
         with st.expander("👁️ Preview Data", expanded=False):

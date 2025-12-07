@@ -240,11 +240,12 @@ This will run a simulation showing how the SQL data is fed into an LLM prompt to
 
 We've built a full-featured Streamlit application with:
 - 🧠 **Intelligent Agent** - Works with ANY AWS service SQL output
-- 🔍 **Auto-Detection** - Automatically identifies AWS service from your data
-- 💡 **Smart Questions** - Generates contextual questions based on your data
-- 📁 CSV upload for Athena query results
-- 💬 Interactive chat interface powered by AWS Bedrock (Claude 3)
-- 📊 Auto-generated visualizations and insights
+- � **Multi-eFile Upload** - Upload multiple CSV files simultaneously
+- � **SAuto-Detection** - Identifies 14+ AWS data sources (CUR, Trusted Advisor, Cost Optimization Hub, etc.)
+- � **VSmart Merging** - Automatically merges compatible files for comprehensive analysis
+- � **tSmart Questions** - Generates contextual questions based on your data
+- � AInteractive chat interface powered by AWS Bedrock (Claude 3)
+- �  Auto-generated visualizations and insights
 - 📈 Automatic data profiling and summary tables
 - 🎯 Learning capabilities that improve over time
 
