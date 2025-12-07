@@ -809,7 +809,7 @@ LIMIT 20;
         st.markdown("<br>", unsafe_allow_html=True)
     
     # Metrics in a clean layout
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.metric("📊 Total Rows", f"{summary['total_rows']:,}")
@@ -819,6 +819,11 @@ LIMIT 20;
         st.metric("📋 Columns", summary['total_columns'])
     with col4:
         st.metric("⏱️ Queries", st.session_state.query_count)
+    with col5:
+        if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
+            # Generate example count
+            examples = agent.generate_example_sql_queries()
+            st.metric("📚 SQL Examples", len(examples))
     
     # Show intelligent summary table
     agent = st.session_state.intelligent_agent
@@ -828,6 +833,10 @@ LIMIT 20;
             with st.expander("📊 Detailed Summary Statistics", expanded=False):
                 summary_df = pd.DataFrame(list(summary_table.items()), columns=['Metric', 'Value'])
                 st.dataframe(summary_df, use_container_width=True, hide_index=True)
+    
+    # Prominent SQL Examples callout
+    if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
+        st.info("💡 **New!** Auto-generated SQL query examples are available below. Scroll down to the '📚 Example SQL Queries' section to explore pre-built queries tailored to your data!")
     
     st.markdown("---")
     
@@ -854,8 +863,15 @@ LIMIT 20;
     agent = st.session_state.intelligent_agent
     if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
         
+        # Initialize first-time flag for SQL examples
+        if 'sql_examples_shown' not in st.session_state:
+            st.session_state.sql_examples_shown = True
+            expand_sql_examples = True
+        else:
+            expand_sql_examples = False
+        
         # Example SQL Queries Section
-        with st.expander("📚 Example SQL Queries - Learn by Example", expanded=False):
+        with st.expander("📚 Example SQL Queries - Learn by Example", expanded=expand_sql_examples):
             st.caption("Pre-built SQL queries tailored to your data. Click to copy and modify!")
             
             # Generate examples based on uploaded data
