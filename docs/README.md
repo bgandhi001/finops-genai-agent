@@ -19,6 +19,7 @@
 - **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - New features (DuckDB, Text-to-SQL, CLI commands)
 - **[AGENT_COMPARISON.md](AGENT_COMPARISON.md)** - Comparison of different agents
 - **[UI_GUIDE.md](UI_GUIDE.md)** - User interface guide
+- **[SAMPLE_DATA_GUIDE.md](SAMPLE_DATA_GUIDE.md)** - Sample datasets for testing and training
 
 ## Architecture & Design
 
@@ -73,7 +74,8 @@ docs/
 │   ├── README_STREAMLIT.md
 │   ├── INTELLIGENT_AGENT.md
 │   ├── ENHANCEMENTS.md
-│   └── UI_GUIDE.md
+│   ├── UI_GUIDE.md
+│   └── SAMPLE_DATA_GUIDE.md
 ├── Architecture/
 │   ├── ARCHITECTURE.md
 │   ├── PROJECT_SUMMARY.md

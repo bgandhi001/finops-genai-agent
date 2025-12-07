@@ -300,4 +300,14 @@ streamlit run streamlit_app.py
 python scripts/generate_sample_data.py
 ```
 
-This creates sample CSV files in `sample_data/` that you can upload to test the app without running actual Athena queries.
+This creates comprehensive sample CSV files in `sample_data/` that you can upload to test the app without running actual Athena queries.
+
+**Available Sample Datasets:**
+- 📊 **EBS Volumes** - Identify unattached volumes ($2K+ potential savings)
+- 🪣 **S3 Buckets** - Find unused buckets with no GET/PUT operations ($1K+ savings)
+- 📈 **Monthly Trends** - 12 months of cost trends across 10 services
+- 🏗️ **Architecture Data** - Detect inefficiencies from billing patterns
+- 🏷️ **Tagging Analysis** - Find and correlate untagged resources
+- 💰 **Cost Analysis** - General cost breakdown by service and region
+
+See [Sample Data Guide](docs/SAMPLE_DATA_GUIDE.md) for detailed information on each dataset.
