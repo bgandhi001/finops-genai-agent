@@ -47,6 +47,64 @@ class EnhancedAWSAgent(IntelligentAWSAgent):
         except Exception as e:
             print(f"Error loading data: {str(e)}")
             return False
+    
+    def generate_athena_query_from_prompt(self, user_prompt, is_cur_data=False):
+        """
+        Generate Athena SQL query based on user's natural language prompt
+        Optimized for CUR (Cost & Usage Report) data structure
+        """
+        # Detect if this is CUR data
+        columns = [col.lower() for col in self.data.columns]
+        is_cur = is_cur_data or any('line_item' in col for col in columns)
+        
+        # Build column context
+        if is_cur:
+            # CUR-specific columns
+            common_cur_columns = """
+            Common CUR Columns:
+            - line_item_usage_account_id: AWS Account ID
+            - line_item_product_code: AWS Service (e.g., AmazonEC2, AmazonS3)
+            - line_item_usage_type: Usage type details
+            - line_item_operation: Operation performed
+            - line_item_resource_id: Resource identifier
+            - line_item_usage_start_date: Usage start timestamp
+            - line_item_usage_end_date: Usage end timestamp
+            - line_item_unblended_cost: Actual cost
+            - line_item_blended_cost: Blended cost
+            - product_region: AWS Region
+            - product_instance_type: Instance type (for EC2)
+            - resource_tags_*: Resource tags
+            """
+            table_name = "cost_and_usage_report"
+        else:
+            # Use actual columns from data
+            columns_info = "\n".join([f"- {col}" for col in self.data.columns[:20]])
+            common_cur_columns = f"Available Columns:\n{columns_info}"
+            table_name = "your_table_name"
+        
+        query_template = f"""Generate an AWS Athena SQL query for the following request.
+
+{common_cur_columns}
+
+TABLE NAME: {table_name}
+
+USER REQUEST: {user_prompt}
+
+REQUIREMENTS:
+1. Use Athena SQL syntax (Presto-based)
+2. Include appropriate WHERE clauses for date filtering
+3. Use proper aggregations (SUM, COUNT, AVG)
+4. Add GROUP BY for dimensional analysis
+5. Include ORDER BY for top results
+6. Add LIMIT for large result sets
+7. Use meaningful column aliases
+8. Add comments explaining the query
+
+Generate ONLY the SQL query with comments. No explanations before or after.
+
+SQL Query:"""
+        
+        return query_template
 
     
     def execute_sql(self, sql_query):

@@ -825,21 +825,146 @@ def main():
         
         st.markdown("---")
         
-        # Show example queries
-        st.subheader("📝 Example SQL Queries")
+        # Intelligent Athena Query Generator
+        st.subheader("🔮 Intelligent Athena Query Generator")
+        st.caption("Describe what you want to analyze, and AI will generate the perfect Athena query for your CUR data")
         
-        tab1, tab2, tab3 = st.tabs(["Architecture Analysis", "Tagging Analysis", "Cost Analysis"])
+        # Quick prompt suggestions
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**💡 Example Prompts:**")
+            example_prompts = [
+                "Show me top 10 services by cost in the last 30 days",
+                "Find all EC2 instances with their costs grouped by region",
+                "Identify untagged resources and their total cost",
+                "Show daily cost trends for the last month",
+                "Find resources with high data transfer costs"
+            ]
+            for prompt in example_prompts:
+                if st.button(f"📝 {prompt}", key=f"athena_prompt_{example_prompts.index(prompt)}", use_container_width=True):
+                    st.session_state.athena_prompt = prompt
         
-        with tab1:
-            with open('sql/athena_architecture_inference.sql', 'r') as f:
-                st.code(f.read(), language='sql')
+        with col2:
+            st.markdown("**🎯 Common Analysis Types:**")
+            st.markdown("""
+            - Cost optimization opportunities
+            - Resource utilization patterns
+            - Tagging compliance analysis
+            - Cross-region cost comparison
+            - Service-specific deep dives
+            - Anomaly detection
+            """)
         
-        with tab2:
-            with open('sql/athena_tagging_correlation.sql', 'r') as f:
-                st.code(f.read(), language='sql')
+        # Query generator interface
+        with st.expander("🔧 Generate Athena Query", expanded=True):
+            user_prompt = st.text_area(
+                "What would you like to analyze?",
+                value=st.session_state.get('athena_prompt', ''),
+                placeholder="Example: Show me the top 5 most expensive EC2 instance types in us-east-1 for the last 7 days",
+                height=100,
+                help="Describe your analysis goal in natural language. The AI will generate an optimized Athena query."
+            )
+            
+            col1, col2, col3 = st.columns([1, 1, 2])
+            with col1:
+                is_cur_data = st.checkbox("CUR Data", value=True, help="Check if analyzing Cost & Usage Report data")
+            with col2:
+                generate_btn = st.button("🚀 Generate Query", type="primary")
+            with col3:
+                st.caption("💡 Tip: Be specific about time ranges and dimensions")
+            
+            if generate_btn and user_prompt:
+                with st.spinner("Generating optimized Athena query..."):
+                    try:
+                        # Use Bedrock to generate the query
+                        bedrock = get_bedrock_client()
+                        
+                        # Create prompt for query generation
+                        agent = st.session_state.intelligent_agent
+                        if isinstance(agent, EnhancedAWSAgent):
+                            query_prompt = agent.generate_athena_query_from_prompt(user_prompt, is_cur_data)
+                        else:
+                            # Fallback prompt
+                            query_prompt = f"""Generate an AWS Athena SQL query for: {user_prompt}
+                            
+Use Cost & Usage Report table structure with columns like:
+- line_item_product_code (service)
+- line_item_unblended_cost (cost)
+- line_item_usage_start_date (date)
+- product_region (region)
+
+Generate ONLY the SQL query with comments."""
+                        
+                        # Call Bedrock
+                        response = bedrock.invoke_model(
+                            modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                            body=json.dumps({
+                                "anthropic_version": "bedrock-2023-05-31",
+                                "max_tokens": 2000,
+                                "messages": [{
+                                    "role": "user",
+                                    "content": query_prompt
+                                }],
+                                "temperature": 0.3
+                            })
+                        )
+                        
+                        response_body = json.loads(response['body'].read())
+                        generated_query = response_body['content'][0]['text']
+                        
+                        # Clean up the query
+                        generated_query = generated_query.strip()
+                        if '```sql' in generated_query:
+                            generated_query = generated_query.split('```sql')[1].split('```')[0].strip()
+                        elif '```' in generated_query:
+                            generated_query = generated_query.split('```')[1].split('```')[0].strip()
+                        
+                        st.success("✅ Query generated successfully!")
+                        
+                        # Display the query
+                        st.code(generated_query, language='sql')
+                        
+                        # Download button
+                        st.download_button(
+                            label="📥 Download Query",
+                            data=generated_query,
+                            file_name="athena_query.sql",
+                            mime="text/sql"
+                        )
+                        
+                        # Helpful tips
+                        st.info("""
+                        **📋 Next Steps:**
+                        1. Copy the query above
+                        2. Open AWS Athena Console
+                        3. Paste and run the query
+                        4. Upload the results CSV back here for AI analysis
+                        """)
+                        
+                    except Exception as e:
+                        st.error(f"❌ Error generating query: {str(e)}")
+                        st.info("💡 Try rephrasing your request or check AWS credentials")
         
-        with tab3:
-            st.code("""
+        # Link to SQL templates
+        with st.expander("📚 View SQL Templates", expanded=False):
+            tab1, tab2, tab3 = st.tabs(["Architecture Analysis", "Tagging Analysis", "Cost Analysis"])
+            
+            with tab1:
+                try:
+                    with open('sql/athena_architecture_inference.sql', 'r') as f:
+                        st.code(f.read(), language='sql')
+                except:
+                    st.info("Template file not found")
+            
+            with tab2:
+                try:
+                    with open('sql/athena_tagging_correlation.sql', 'r') as f:
+                        st.code(f.read(), language='sql')
+                except:
+                    st.info("Template file not found")
+            
+            with tab3:
+                st.code("""
 -- Simple Cost Analysis Query
 SELECT 
     line_item_product_code as service,
@@ -850,7 +975,7 @@ WHERE line_item_usage_start_date >= DATE_ADD('day', -30, CURRENT_DATE)
 GROUP BY line_item_product_code
 ORDER BY total_cost DESC
 LIMIT 20;
-            """, language='sql')
+                """, language='sql')
         
         return
     
@@ -873,7 +998,7 @@ LIMIT 20;
         st.markdown("<br>", unsafe_allow_html=True)
     
     # Metrics in a clean layout
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric("📊 Total Rows", f"{summary['total_rows']:,}")
@@ -883,11 +1008,6 @@ LIMIT 20;
         st.metric("📋 Columns", summary['total_columns'])
     with col4:
         st.metric("⏱️ Queries", st.session_state.query_count)
-    with col5:
-        if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
-            # Generate example count
-            examples = agent.generate_example_sql_queries()
-            st.metric("📚 SQL Examples", len(examples))
     
     # Show intelligent summary table
     agent = st.session_state.intelligent_agent
@@ -897,10 +1017,6 @@ LIMIT 20;
             with st.expander("📊 Detailed Summary Statistics", expanded=False):
                 summary_df = pd.DataFrame(list(summary_table.items()), columns=['Metric', 'Value'])
                 st.dataframe(summary_df, use_container_width=True, hide_index=True)
-    
-    # Prominent SQL Examples callout
-    if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
-        st.info("💡 **New!** Auto-generated SQL query examples are available below. Scroll down to the '📚 Example SQL Queries' section to explore pre-built queries tailored to your data!")
     
     st.markdown("---")
     
@@ -927,49 +1043,65 @@ LIMIT 20;
     agent = st.session_state.intelligent_agent
     if isinstance(agent, EnhancedAWSAgent) and agent.data is not None:
         
-        # Initialize first-time flag for SQL examples
-        if 'sql_examples_shown' not in st.session_state:
-            st.session_state.sql_examples_shown = True
-            expand_sql_examples = True
-        else:
-            expand_sql_examples = False
-        
-        # Example SQL Queries Section
-        with st.expander("📚 Example SQL Queries - Learn by Example", expanded=expand_sql_examples):
-            st.caption("Pre-built SQL queries tailored to your data. Click to copy and modify!")
+        # Intelligent Athena Query Generator (for uploaded data)
+        with st.expander("🔮 Generate Athena Query for Your Data", expanded=False):
+            st.caption("Describe what you want to analyze, and AI will generate an optimized query")
             
-            # Generate examples based on uploaded data
-            examples = agent.generate_example_sql_queries()
+            user_prompt = st.text_area(
+                "What would you like to analyze?",
+                placeholder="Example: Show me resources with costs above $100 grouped by service and region",
+                height=80,
+                key="athena_gen_uploaded"
+            )
             
-            # Group by category
-            categories = {}
-            for example in examples:
-                cat = example['category']
-                if cat not in categories:
-                    categories[cat] = []
-                categories[cat].append(example)
-            
-            # Display by category with tabs
-            if categories:
-                tabs = st.tabs(list(categories.keys()))
-                
-                for tab, (category, queries) in zip(tabs, categories.items()):
-                    with tab:
-                        for i, query in enumerate(queries):
-                            col1, col2 = st.columns([3, 1])
+            if st.button("🚀 Generate Query", key="gen_query_uploaded"):
+                if user_prompt:
+                    with st.spinner("Generating query..."):
+                        try:
+                            bedrock = get_bedrock_client()
                             
-                            with col1:
-                                st.markdown(f"**{query['description']}**")
-                                st.caption(f"💡 {query['use_case']}")
+                            # Detect if CUR data
+                            columns = [col.lower() for col in agent.data.columns]
+                            is_cur = any('line_item' in col for col in columns)
                             
-                            with col2:
-                                if st.button("📋 Copy", key=f"copy_{category}_{i}"):
-                                    st.session_state.sql_to_execute = query['sql']
-                                    st.success("Copied!")
+                            query_prompt = agent.generate_athena_query_from_prompt(user_prompt, is_cur)
                             
-                            # Show SQL in code block
-                            st.code(query['sql'], language='sql')
-                            st.divider()
+                            response = bedrock.invoke_model(
+                                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                                body=json.dumps({
+                                    "anthropic_version": "bedrock-2023-05-31",
+                                    "max_tokens": 2000,
+                                    "messages": [{
+                                        "role": "user",
+                                        "content": query_prompt
+                                    }],
+                                    "temperature": 0.3
+                                })
+                            )
+                            
+                            response_body = json.loads(response['body'].read())
+                            generated_query = response_body['content'][0]['text']
+                            
+                            # Clean up
+                            generated_query = generated_query.strip()
+                            if '```sql' in generated_query:
+                                generated_query = generated_query.split('```sql')[1].split('```')[0].strip()
+                            elif '```' in generated_query:
+                                generated_query = generated_query.split('```')[1].split('```')[0].strip()
+                            
+                            st.success("✅ Query generated!")
+                            st.code(generated_query, language='sql')
+                            
+                            st.download_button(
+                                label="📥 Download Query",
+                                data=generated_query,
+                                file_name="athena_query.sql",
+                                mime="text/sql",
+                                key="download_gen_query"
+                            )
+                            
+                        except Exception as e:
+                            st.error(f"Error: {str(e)}")
         
         # Execute SQL Query Section
         with st.expander("🔧 Advanced: Execute SQL Query", expanded=False):
